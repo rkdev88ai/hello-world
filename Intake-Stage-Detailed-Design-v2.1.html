@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intake Stage (v2.1) — Detailed Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B2A33; --muted:#5B6B74; --hairline:#D8DEDC; --paper:#F6F7F5; --panel:#FFFFFF;
+  --accent:#0F6B62;
+  --c-human:#A8681F; --c-api:#2D5FA6; --c-agent:#7A4FA6; --c-rules:#0F6B62;
+  --t-human:#F6EBDC; --t-api:#E2EAF6; --t-agent:#EEE7F6; --t-rules:#DFEEEC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.62}
+.wrap{max-width:1120px;margin:0 auto;padding:0 32px}
+h1,h2,h3,h4{font-family:"Sora",sans-serif;line-height:1.18;letter-spacing:-0.015em}
+.mono{font-family:"IBM Plex Mono",monospace}
+.cover{border-bottom:3px solid var(--ink);padding:56px 0 40px;background:var(--panel)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.cover h1{font-size:40px;font-weight:800;margin:14px 0 16px;max-width:900px}
+.cover p.lede{font-size:18.5px;max-width:860px;color:var(--muted)}
+.cover .meta{display:flex;gap:36px;margin-top:26px;flex-wrap:wrap}
+.cover .meta div{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted)}
+.cover .meta b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+section{padding:48px 0 12px}
+.secnum{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.1em}
+h2{font-size:29px;font-weight:700;margin:6px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+h3{font-size:20px;font-weight:700;margin:32px 0 10px}
+p{margin:0 0 14px;max-width:920px}
+ul,ol{margin:0 0 16px 22px;max-width:900px}
+li{margin-bottom:7px}
+strong{font-weight:600}
+.callout{background:var(--panel);border-left:4px solid var(--accent);padding:16px 20px;margin:20px 0;max-width:920px}
+.callout p:last-child{margin-bottom:0}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 9px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.chip.human{background:var(--t-human);color:var(--c-human);border:1px solid var(--c-human)}
+.chip.api{background:var(--t-api);color:var(--c-api);border:1px solid var(--c-api)}
+.chip.agent{background:var(--t-agent);color:var(--c-agent);border:1px solid var(--c-agent)}
+.chip.rules{background:var(--t-rules);color:var(--c-rules);border:1px solid var(--c-rules)}
+.chip.hybrid{background:#fff;color:var(--ink);border:1px dashed var(--muted)}
+table{width:100%;border-collapse:collapse;margin:18px 0 26px;background:var(--panel);font-size:14.5px}
+th{font-family:"Sora",sans-serif;font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;text-align:left;padding:10px 12px;border-bottom:2px solid var(--ink)}
+td{padding:11px 12px;border-bottom:1px solid var(--hairline);vertical-align:top}
+td .stepid{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;white-space:nowrap}
+tr:hover td{background:#FBFCFB}
+figure{background:var(--panel);border:1px solid var(--hairline);border-top:3px solid var(--ink);margin:26px 0 32px;padding:22px 22px 14px}
+figcaption{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+figcaption b{color:var(--ink)}
+figure svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--hairline)}
+.legend span{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+footer{border-top:3px solid var(--ink);margin-top:52px;padding:24px 0 44px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+@media (max-width:760px){.cover h1{font-size:30px}.wrap{padding:0 18px}}
+@media print{body{font-size:12.5px}figure{break-inside:avoid}table{font-size:11.5px}}
+</style>
+</head>
+<body>
+
+<div class="cover"><div class="wrap">
+  <div class="eyebrow">Design Specification &middot; Revision 2.1 &middot; Supersedes Intake §3 of the prior document</div>
+  <h1>Stage 1 — Intake: Detailed Design (v2.1)</h1>
+  <p class="lede">Redesigned intake flow of fourteen steps: sequential scoping (IN-01…03), a five-track parallel evidence build (IN-04…08), a convergent assessment path (IN-09…10), and a human-verified, closed-loop client interaction cycle (IN-11…14) that iterates until the document checklist has zero gaps — each step classified as human, API/STP, deterministic rules, or agentic.</p>
+  <div class="meta">
+    <div><b>Scope</b>Intake stage only</div>
+    <div><b>Entry</b>prospect.qualified event (CRM)</div>
+    <div><b>Exit</b>IN-10 gap set empty → Gate G1</div>
+    <div><b>Status</b>Draft for architecture review</div>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<!-- ============================ 1. DEPENDENCY MODEL ============================ -->
+<section id="deps">
+  <div class="secnum">SECTION 01</div>
+  <h2>Execution &amp; Dependency Model</h2>
+  <p>The orchestrator instantiates the twelve steps with the following precedence constraints. Everything not explicitly ordered runs as early as its inputs allow — the requirement graph, not a hard-coded sequence, is what the Case Orchestrator executes.</p>
+  <table>
+    <tr><th style="width:140px">Constraint</th><th>Rule</th><th>Orchestration mechanics</th></tr>
+    <tr><td class="mono">Sequential head</td><td>IN-01 → IN-02 → IN-03 strictly in order.</td><td>Each step's completion event releases the next. IN-03 (scope) is the trigger that lets the Policy Engine size the rest of the stage.</td></tr>
+    <tr><td class="mono">Parallel fan-out</td><td>IN-04, IN-05, IN-06, IN-07, IN-08 all start on IN-03 completion.</td><td>Five independent tracks; each fails, retries, and completes on its own. IN-08 is instantiated <em>only if</em> Financial Markets products are in the IN-03 scope.</td></tr>
+    <tr><td class="mono">Soft input</td><td>IN-05 is informational only — it never blocks anything. But if its ownership data is available when IN-07 runs (or arrives while IN-07 is open), it must be consumed as an input.</td><td>Modelled as an <em>optional data subscription</em>: IN-07 subscribes to <span class="mono">ownership.draft.updated</span>; late-arriving ownership facts trigger an incremental re-assessment of sanctions nexus within IN-07, never a stage rework.</td></tr>
+    <tr><td class="mono">Assessment join</td><td>IN-09 starts only when IN-04, IN-06 and IN-07 are all complete. IN-05 and IN-08 never gate IN-09.</td><td>AND-join on three completion events. IN-08 joins the flow later, at IN-10, where its questionnaire requirements enter the outreach pack.</td></tr>
+    <tr><td class="mono">Convergent tail</td><td>IN-10 after IN-09; then IN-11 → IN-12 sequentially. IN-11 requires human verification before anything is dispatched.</td><td>IN-10 waits for IN-08's output if IN-08 was instantiated and is still running (the only case where IN-08 delays anything). IN-12 fires only on the IN-11 approval fact.</td></tr>
+    <tr><td class="mono">Client loop</td><td>IN-12 → IN-13 (monitor for client response) → IN-14 (enrich from returned information) → back to IN-10 for a fresh gap check. The loop repeats until the gap set is empty.</td><td>IN-13 is a standing listener (channel webhook + mailbox polling fallback), not a queued task. Each IN-14 completion re-runs IN-10 as an <em>incremental</em> gap check; a non-empty gap set produces a delta outreach (only the still-missing items, via IN-11's human verification again); an empty gap set exits the loop and hands the case to Gate G1. Loop-count and elapsed-time guards escalate stalled cases to the RM.</td></tr>
+  </table>
+
+  <div class="callout"><p><strong>Stage exit is now the loop's exit condition, not a dispatch event:</strong> the stage completes when an IN-10 gap check returns an empty set — everything the policy checklist demands is evidenced, including client-verified data. Gate G1 then evaluates on a fully closed checklist rather than on "we've asked the client", which materially raises the quality of what Tax, Enrich and KYC inherit.</p></div>
+
+  <figure>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--t-api);border:1px solid var(--c-api)"></span>API / STP</span>
+      <span><span class="sw" style="background:var(--t-rules);border:1px solid var(--c-rules)"></span>Rules</span>
+      <span><span class="sw" style="background:var(--t-agent);border:1px solid var(--c-agent)"></span>Agentic</span>
+      <span><span class="sw" style="background:var(--t-human);border:1px solid var(--c-human)"></span>Human</span>
+      <span><span class="sw" style="background:#fff;border:1px dashed #5B6B74"></span>Hybrid (auto + human tail)</span>
+    </div>
+    <svg viewBox="0 0 1080 812" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1B2A33"/>
+        </marker>
+        <marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#7A4FA6"/>
+        </marker>
+        <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#0F6B62"/>
+        </marker>
+        <marker id="arrH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#A8681F"/>
+        </marker>
+      </defs>
+
+      <!-- Sequential head -->
+      <g font-size="10.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="160" y="24" width="200" height="64" rx="5" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="1.6"/>
+        <text x="260" y="46" font-weight="600">IN-01</text><text x="260" y="62">CRM prospect received</text>
+        <rect x="440" y="24" width="200" height="64" rx="5" fill="#fff" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="5 3"/>
+        <text x="540" y="46" font-weight="600">IN-02</text><text x="540" y="62">Entity resolution &amp;</text><text x="540" y="76">de-dupe vs client master</text>
+        <rect x="720" y="24" width="200" height="64" rx="5" fill="#F6EBDC" stroke="#A8681F" stroke-width="1.6"/>
+        <text x="820" y="46" font-weight="600">IN-03</text><text x="820" y="62">Jurisdiction &amp;</text><text x="820" y="76">product scoping</text>
+      </g>
+      <g stroke="#1B2A33" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+        <path d="M360,56 L436,56"/><path d="M640,56 L716,56"/>
+      </g>
+
+      <!-- Fan-out spine -->
+      <g stroke="#1B2A33" stroke-width="1.5" fill="none">
+        <path d="M820,88 L820,116"/>
+        <path d="M120,116 L968,116"/>
+        <path d="M120,116 L120,152" marker-end="url(#arr)"/>
+        <path d="M332,116 L332,152" marker-end="url(#arr)"/>
+        <path d="M544,116 L544,152" marker-end="url(#arr)"/>
+        <path d="M756,116 L756,152" marker-end="url(#arr)"/>
+        <path d="M968,116 L968,152" marker-end="url(#arr)"/>
+      </g>
+
+      <!-- Parallel band -->
+      <rect x="14" y="142" width="1052" height="168" rx="8" fill="none" stroke="#D8DEDC" stroke-dasharray="5 4"/>
+      <text x="330" y="104" font-size="10" fill="#5B6B74" text-anchor="middle">PARALLEL TRACKS — start on IN-03 completion</text>
+      <g font-size="10.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="24" y="158" width="192" height="82" rx="5" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="1.6"/>
+        <text x="120" y="180" font-weight="600">IN-04</text><text x="120" y="196">Data enrichment</text><text x="120" y="210">(external sources)</text>
+        <rect x="236" y="158" width="192" height="82" rx="5" fill="#EEE7F6" stroke="#7A4FA6" stroke-width="1.6"/>
+        <text x="332" y="180" font-weight="600">IN-05</text><text x="332" y="196">Initial ownership</text><text x="332" y="210">structure</text><text x="332" y="226" font-size="9.5" fill="#7A4FA6">ℹ informational — never blocks</text>
+        <rect x="448" y="158" width="192" height="82" rx="5" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="1.6"/>
+        <text x="544" y="180" font-weight="600">IN-06</text><text x="544" y="196">Adverse media &amp;</text><text x="544" y="210">sanctions view</text>
+        <rect x="660" y="158" width="192" height="82" rx="5" fill="#fff" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="5 3"/>
+        <text x="756" y="180" font-weight="600">IN-07</text><text x="756" y="196">Initial screening</text><text x="756" y="210">&amp; assessment</text>
+        <rect x="872" y="158" width="192" height="82" rx="5" fill="#DFEEEC" stroke="#0F6B62" stroke-width="1.6"/>
+        <text x="968" y="180" font-weight="600">IN-08</text><text x="968" y="196">Reg classification</text><text x="968" y="210">applicability</text><text x="968" y="226" font-size="9.5" fill="#0F6B62">▲ only if FM products in IN-03</text>
+      </g>
+
+      <!-- IN-05 -> IN-07 soft input (arc below boxes, inside band) -->
+      <path d="M332,242 C420,290 668,290 754,244" fill="none" stroke="#7A4FA6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrP)"/>
+      <text x="544" y="298" font-size="9.5" fill="#7A4FA6" text-anchor="middle">soft input: ownership data (if / when available) → sanctions-nexus assessment in IN-07</text>
+
+      <!-- Join 04+06+07 -->
+      <g transform="translate(544,360)"><rect x="-26" y="-26" width="52" height="52" transform="rotate(45)" fill="#fff" stroke="#1B2A33" stroke-width="2"/><text y="-2" font-size="9.5" text-anchor="middle">AND</text><text y="10" font-size="9.5" text-anchor="middle">JOIN</text></g>
+      <g stroke="#1B2A33" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+        <path d="M120,240 C120,340 400,358 512,360"/>
+        <path d="M544,310 L544,330"/>
+        <path d="M756,240 C756,340 660,358 576,360"/>
+      </g>
+      <path d="M544,240 L544,310" stroke="#1B2A33" stroke-width="1.5" fill="none"/>
+      <text x="330" y="398" font-size="9.5" fill="#5B6B74" text-anchor="end">join = IN-04 + IN-06 + IN-07 only —</text>
+      <text x="330" y="411" font-size="9.5" fill="#5B6B74" text-anchor="end">IN-05 and IN-08 never gate IN-09</text>
+
+      <!-- IN-09 -->
+      <g font-size="10.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="449" y="404" width="190" height="72" rx="5" fill="#DFEEEC" stroke="#0F6B62" stroke-width="1.6"/>
+        <text x="544" y="428" font-weight="600">IN-09</text><text x="544" y="444">Preliminary risk</text><text x="544" y="458">assessment</text>
+      </g>
+      <path d="M544,386 L544,400" stroke="#1B2A33" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+      <!-- Tail row -->
+      <g font-size="10.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="100" y="516" width="240" height="82" rx="5" fill="#DFEEEC" stroke="#0F6B62" stroke-width="1.6"/>
+        <text x="220" y="538" font-weight="600">IN-10</text><text x="220" y="554">Policy / doc-checklist gap</text><text x="220" y="568">analysis · outreach prep</text>
+        <rect x="440" y="516" width="240" height="82" rx="5" fill="#EEE7F6" stroke="#A8681F" stroke-width="2"/>
+        <text x="560" y="536" font-weight="600">IN-11</text><text x="560" y="551">Verification summary</text><text x="560" y="565">(agent-drafted)</text><text x="560" y="581" font-size="9.5" fill="#A8681F" font-weight="600">✓ human verification before send</text>
+        <rect x="780" y="516" width="240" height="82" rx="5" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="1.6"/>
+        <text x="900" y="538" font-weight="600">IN-12</text><text x="900" y="554">Dispatch approved</text><text x="900" y="568">pack via channel</text>
+      </g>
+      <g stroke="#1B2A33" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+        <path d="M449,440 C330,440 244,455 244,512"/>
+        <path d="M340,557 L436,557"/>
+        <path d="M680,557 L776,557"/>
+      </g>
+
+      <!-- Loop row: IN-13, IN-14 -->
+      <g font-size="10.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="780" y="636" width="240" height="82" rx="5" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="1.6"/>
+        <text x="900" y="656" font-weight="600">IN-13</text><text x="900" y="671">Monitor client response</text><text x="900" y="685">channel event · mailbox poll</text>
+        <rect x="440" y="636" width="240" height="82" rx="5" fill="#EEE7F6" stroke="#7A4FA6" stroke-width="1.6"/>
+        <text x="560" y="656" font-weight="600">IN-14</text><text x="560" y="671">Enrich from client info</text><text x="560" y="685">agentic PDF / doc reading</text>
+      </g>
+      <g stroke="#1B2A33" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+        <path d="M900,598 L900,632"/>
+        <path d="M776,677 L684,677"/>
+      </g>
+      <text x="855" y="620" font-size="9.5" fill="#5B6B74">await</text>
+      <text x="730" y="668" font-size="9.5" fill="#5B6B74" text-anchor="middle">submission</text>
+      <!-- IN-13 standing-listener self loop -->
+      <path d="M1020,656 C1052,646 1052,690 1022,684" fill="none" stroke="#2D5FA6" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+      <text x="1046" y="734" font-size="9.5" fill="#2D5FA6" text-anchor="end">standing listener</text>
+      <!-- Loop back to IN-10 -->
+      <path d="M436,677 C320,677 232,672 232,602" fill="none" stroke="#A8681F" stroke-width="1.8" marker-end="url(#arrH)"/>
+      <text x="330" y="712" font-size="9.5" fill="#A8681F" text-anchor="middle">loop: incremental gap re-check —</text>
+      <text x="330" y="725" font-size="9.5" fill="#A8681F" text-anchor="middle">repeat IN-11…14 until gap set is empty</text>
+      <!-- G1 exit from IN-10 -->
+      <g transform="translate(44,557)"><rect x="-21" y="-21" width="42" height="42" transform="rotate(45)" fill="#DFEEEC" stroke="#0F6B62" stroke-width="2"/><text y="4" font-size="10.5" text-anchor="middle" fill="#0F6B62" font-weight="600">G1</text></g>
+      <path d="M96,557 L76,557" fill="none" stroke="#0F6B62" stroke-width="1.6" marker-end="url(#arrG)"/>
+      <text x="44" y="602" font-size="9.5" fill="#0F6B62" text-anchor="middle">gaps = 0</text>
+      <text x="44" y="615" font-size="9.5" fill="#0F6B62" text-anchor="middle">stage exit</text>
+
+      <!-- IN-08 late join into IN-10 -->
+      <path d="M968,240 L968,486 L200,486 L200,512" fill="none" stroke="#0F6B62" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrG)"/>
+      <text x="800" y="502" font-size="9.5" fill="#0F6B62" text-anchor="middle">IN-08 output (regimes + required questionnaires) joins the outreach pack at IN-10</text>
+    </svg>
+    <figcaption><b>Figure 1 — Intake stage v2.1 flow.</b> Sequential head (IN-01…03), five parallel tracks (IN-04…08), an AND-join on 04+06+07 into IN-09, then the human-verified client loop: IN-10 → IN-11 (✓ human verification) → IN-12 → IN-13 → IN-14 → back to IN-10, iterating until the gap set is empty and the stage exits to Gate G1. Purple dashed = IN-05's soft input to IN-07; teal dashed = IN-08's late join at IN-10; amber = the client-response loop.</figcaption>
+  </figure>
+</section>
+<!-- ============================ 2. STEP-LEVEL DESIGN ============================ -->
+<section id="steps">
+  <div class="secnum">SECTION 02</div>
+  <h2>Step-Level Design</h2>
+  <table>
+    <tr><th style="width:70px">Step</th><th style="width:250px">Name &amp; what happens</th><th style="width:120px">Type</th><th>Execution detail</th><th style="width:225px">Human touchpoint / exception</th></tr>
+
+    <tr><td><span class="stepid">IN-01</span></td><td><strong>CRM prospect received.</strong> Consume <span class="mono">prospect.qualified</span> from CRM; open the case; return the case ID for bidirectional status sync.</td><td><span class="chip api">API / STP</span></td><td>Event subscription on the mesh; schema-validated payload (legal name, country of incorporation, registration identifiers if known, owning RM, opportunity products); idempotent case creation keyed on CRM opportunity ID so replays never double-create.</td><td>None. Malformed payloads are rejected back to CRM with a machine-readable reason code; nothing lands in a human queue.</td></tr>
+
+    <tr><td><span class="stepid">IN-02</span></td><td><strong>Entity resolution &amp; de-duplication.</strong> Match the prospect against the internal client master and in-flight cases. Outcomes: new entity / existing client (route to extend-scope flow) / duplicate in-flight case (merge).</td><td><span class="chip hybrid">Hybrid</span></td><td>Deterministic first pass on strong keys (LEI, registration number, tax ID). Unmatched records go to the Entity Resolution agent, which scores fuzzy candidates (name variants, transliterations, group hierarchy membership) with cited evidence per candidate. Auto-merge only above the policy-set confidence threshold; the match decision is written to the ledger as a resolution fact with its evidence.</td><td>Below-threshold matches → data steward picks from the ranked, evidence-backed candidate list (accept / reject / new entity). SLA-clocked; steward decision feeds back as agent training signal.</td></tr>
+
+    <tr><td><span class="stepid">IN-03</span></td><td><strong>Jurisdiction &amp; product scoping.</strong> RM confirms the markets where the client will be served and the product set (cash, FX, derivatives, trade finance, secured lending…). This is the step that sizes the entire remainder of the stage — the five parallel tracks are instantiated from its output.</td><td><span class="chip human">Human</span></td><td>RM Workbench task with an agent-drafted scope proposal: the client's operating footprint (from CRM + any early data) × the bank's network coverage × cross-sell patterns of comparable clients. Policy Engine validates the chosen combination inline (unsupported market/product pairs blocked with the reason shown). On confirmation, <span class="mono">scope.confirmed</span> releases IN-04…08 and the Policy Engine derives the stage's requirement graph.</td><td>RM decision <em>is</em> the step. If the RM defers, SLA escalation to the team lead; scope changes later in the stage trigger a targeted re-plan (delta tracks only), not a restart.</td></tr>
+
+    <tr><td><span class="stepid">IN-04</span></td><td><strong>Data enrichment (external sources).</strong> Retrieve company registry extracts, GLEIF/LEI, credit bureau &amp; corporate hierarchy data (D&amp;B or equivalent), KYC-utility profiles for every in-scope market; reconcile into a proposed golden record.</td><td><span class="chip api">API / STP</span> + <span class="chip agent">Agentic</span></td><td>Parallel connector calls with per-source retries and circuit breakers; raw payloads hashed into the Evidence Vault. The reconciliation agent then aligns attributes across sources (legal name, status, addresses, industry codes) with per-attribute citations and confidence; source-precedence rules come from the Policy Engine, not the agent.</td><td>Material conflicts (e.g., "dissolved" status in one source) → data steward with the agent's side-by-side comparison. Source outages leave the requirement open and tracked — never silently skipped.</td></tr>
+
+    <tr><td><span class="stepid">IN-05</span></td><td><strong>Initial ownership structure (informational).</strong> Build a first-pass ownership tree — likely ≥10% owners and intermediate holdings — from registry filings, annual reports, and vendor hierarchy data. Not a gate for anything in this stage; verification happens in Enrich.</td><td><span class="chip agent">Agentic</span></td><td>Ownership Unwrap agent recursively processes filings; every ownership edge is citation-backed with a confidence score; thresholds and stop conditions are computed deterministically by the Policy Engine. Publishes <span class="mono">ownership.draft.updated</span> events as the tree grows — which IN-07 subscribes to for sanctions-nexus assessment. Opaque layers (bearer shares, trusts) are recorded as open items for Enrich, with drafted client questions.</td><td>None in-stage — deliberately. Whatever is unresolved becomes an Enrich-stage requirement and (where client input is needed) an item in the IN-10 outreach pack.</td></tr>
+
+    <tr><td><span class="stepid">IN-06</span></td><td><strong>Adverse media &amp; sanctions view.</strong> Assemble the raw external risk picture: submit the company and known parties to sanctions and PEP screening, and pull adverse media coverage for the past 24 months.</td><td><span class="chip api">API / STP</span></td><td>Batch submission to screening providers through the gateway; list versions and query timestamps recorded for audit; the 24-month media window enforced at query time. Output is the unassessed alert/article set plus clean-result facts — assessment deliberately lives in IN-07, keeping data-gathering (repeatable, cheap) separate from judgement (audited).</td><td>None. Zero-alert results write a clean screening fact directly; provider outage keeps the requirement open with automatic resubmission.</td></tr>
+
+    <tr><td><span class="stepid">IN-07</span></td><td><strong>Initial screening &amp; assessment.</strong> Assess everything IN-06 gathered: entity-match plausibility, materiality, and financial-crime relevance per alert; compute sanctions nexus (ownership/control links to sanctioned entities) using IN-05's ownership data whenever available; disposition hits.</td><td><span class="chip hybrid">Hybrid</span></td><td>The Adverse Media agent produces a triage pack per alert — match rationale, discriminators (DOB, geography, identifiers), source credibility, cited summary, and a draft recommendation. Deterministic discriminator rules may auto-close obvious false positives; the agent alone never closes anything. Nexus computation is a deterministic traversal of the available ownership tree against sanctions lists (OFAC 50%-style rules); it re-runs incrementally on each <span class="mono">ownership.draft.updated</span> event, and its output records which ownership snapshot it used.</td><td>Surviving alerts → Compliance Cockpit for disposition with the triage pack attached (typed outcomes: false positive / true — proceed with EDD flag / true — recommend exit; 4-eyes on true hits). A true hit here can trigger early exit before the bank spends full due-diligence effort.</td></tr>
+
+    <tr><td><span class="stepid">IN-08</span></td><td><strong>Regulatory classification applicability (conditional).</strong> If IN-03 scoped any Financial Markets products (FX, derivatives, securities), determine which trading/markets regimes apply and what counterparty classifications must be established — e.g., EMIR FC/NFC+/NFC− and clearing thresholds, Dodd-Frank US-person and ECP status, MiFID II client categorisation, plus APAC OTC regimes (MAS, HKMA, JFSA) per booking market.</td><td><span class="chip rules">Rules</span></td><td><span class="mono">regclass.applicability(scope, entityProfile)</span> on the Policy Engine: booking jurisdictions × FM products × entity attributes → the set of applicable regimes, the classifications to be evidenced, and the client questionnaires/representations required (e.g., ISDA-style classification letters). Output extends the requirement graph and feeds the IN-10 outreach pack. The step only determines <em>applicability and requirements</em>; the classifications themselves are evidenced and confirmed downstream once client responses arrive.</td><td>None in the happy path — pure rules. Regime combinations the rulebook doesn't cover raise a policy-gap exception to the onboarding design authority (a rulebook fix, not a case workaround).</td></tr>
+
+    <tr><td><span class="stepid">IN-09</span></td><td><strong>Preliminary risk assessment.</strong> On completion of IN-04 + IN-06 + IN-07, compute the initial client risk score: country, industry, product, ownership-complexity, channel, and screening-outcome factors.</td><td><span class="chip rules">Rules</span></td><td>Deterministic scoring model in the Policy Engine over the reconciled golden record and screening dispositions; output includes factor-level contributions and sets the diligence tier — which deepens or lightens the document checklist that IN-10 evaluates. Uses IN-05's ownership view opportunistically for the complexity factor (present = scored; absent = defaulted conservatively and flagged).</td><td>None — preliminary by design. The accountable Client Risk Assessment with human sign-off remains a KYC-stage step.</td></tr>
+
+    <tr><td><span class="stepid">IN-10</span></td><td><strong>Policy comparison &amp; outreach preparation.</strong> Compare everything gathered against the policy-derived document/data checklist for this scope and risk tier; identify every gap; assemble a single consolidated client outreach pack.</td><td><span class="chip rules">Rules</span> + <span class="chip agent">Agentic</span></td><td>Gap analysis is deterministic: checklist items from <span class="mono">requirements.derive()</span> (including IN-08's questionnaire requirements, and IN-05's unresolved-ownership questions) minus evidenced items = the gap set, each gap traceable to the rule that demands it. The Narrative agent then drafts the client-facing outreach content — why each item is needed, in plain language, in the client's correspondence language — from those rule-linked gaps. One pack per case; never per-department requests. <em>On loop re-entry from IN-14</em>, the gap check runs incrementally against the newly evidenced items: a non-empty result produces a delta outreach containing only the still-missing or newly-triggered items; an empty result raises <span class="mono">intake.checklist.complete</span> and exits the stage to Gate G1.</td><td>Onboarding officer reviews the outreach pack before it proceeds (accuracy of the ask, tone, client sensitivities) — a 2-minute review of a drafted pack, not an hour of assembly. Waits for IN-08 only when IN-08 was instantiated and is still open. Loop-count and elapsed-time guards escalate cases stuck in the cycle to the RM.</td></tr>
+
+    <tr><td><span class="stepid">IN-11</span></td><td><strong>Client verification summary + human verification.</strong> Compose the summary of (a) information gathered — the profile the bank has built, for the client to verify — and (b) information required — the gap set from IN-10 — as one coherent, channel-ready package. A human verifies the package before anything reaches the client.</td><td><span class="chip agent">Agentic</span> + <span class="chip human">Human</span></td><td>Narrative agent composes strictly from ledger facts; every "we hold this about you" statement is linked to its source; required items carry the plain-language rationale from IN-10. Rendered per channel (portal structured view + PDF); prefilled verification responses where the bank's data can be confirmed with one click. The verification task presents the exact client-facing rendering with per-statement provenance one click away; approval writes an <span class="mono">outreach.approved</span> fact (with the approver and the pack's content hash) that IN-12 requires before dispatch. Edits made during verification are captured as corrections, not free-text overwrites — so the agent's drafting improves from them. On loop iterations, delta packs go through the same verification with a side-by-side diff against the previously approved pack.</td><td><strong>Mandatory human verification</strong> — onboarding officer (or RM for sensitive relationships, flaggable at IN-03) approves, edits, or rejects the pack. Nothing is ever sent to a client without a named approver on the ledger. Reject returns the pack to the agent with the reviewer's reasons; SLA-clocked with escalation.</td></tr>
+
+    <tr><td><span class="stepid">IN-12</span></td><td><strong>Dispatch approved pack.</strong> Send the human-approved pack to the client through the scoped channel (portal invitation, secure e-mail fallback) and schedule the chaser cadence.</td><td><span class="chip api">API / STP</span></td><td>Dispatch fires only on the <span class="mono">outreach.approved</span> fact and sends exactly the approved content hash — no post-approval mutation possible. Delivery receipts and open-tracking land on the ledger; chaser cadence and escalate-to-RM thresholds are policy parameters; chasers reference the original pack rather than generating new asks.</td><td>Client-side only. RM is notified (not tasked) when chasers exhaust — preserving the relationship touch for genuine stalls.</td></tr>
+
+    <tr><td><span class="stepid">IN-13</span></td><td><strong>Monitor client response.</strong> Keep listening for the client's submission: event-driven receipt through the channel when the client submits via portal, with mailbox polling as the fallback for e-mail/attachment responses.</td><td><span class="chip api">API / STP</span></td><td>A standing listener, not a queued task: channel webhook (<span class="mono">client.submission.received</span>) as the primary path; scheduled mailbox polling (secure-mail/shared-mailbox connector) as fallback, with sender-and-reference matching to bind inbound items to the right case and requirement. Partial submissions are accepted and processed item-by-item — the loop doesn't wait for a complete response. Every receipt is acknowledged back to the client automatically; attachments are virus-scanned and hashed into the Evidence Vault on arrival.</td><td>None in the happy path. Unmatchable inbound items (wrong reference, unknown sender) route to an ops triage queue rather than being dropped; chaser escalation from IN-12 remains the stall-handling mechanism.</td></tr>
+
+    <tr><td><span class="stepid">IN-14</span></td><td><strong>Enrich from client-returned information.</strong> Process everything the client sent — verified/corrected profile data, completed questionnaires, and uploaded documents. PDFs and scans are read agentically; extracted data updates the case and closes requirements. Then loop back to IN-10 for a fresh gap check.</td><td><span class="chip agent">Agentic</span></td><td>Doc Intelligence agent classifies each document (which requirement it satisfies, which form family, which version), then extracts fields with per-field confidence and source-page citations; structured portal responses bypass extraction and land directly as evidence facts. Client corrections to bank-held data ("that address is wrong") update the golden record <em>and</em> trigger targeted re-runs of only the steps whose inputs changed (e.g., a corrected registration number re-fires IN-06 screening). Completion raises <span class="mono">enrichment.applied</span>, which re-enters IN-10.</td><td>Low-confidence extractions → targeted human verification of only those fields (never full re-keying). Documents that don't satisfy the requirement they were sent for (wrong doc, expired, unsigned) are marked with a specific defect code so the next IN-11 delta pack explains precisely what to fix.</td></tr>
+  </table>
+
+  <div class="callout"><p><strong>Net human footprint of the stage:</strong> one RM scoping decision (IN-03), exception-only steward touches (IN-02, IN-04), compliance disposition only for surviving alerts (IN-07), and a mandatory verification of every client-bound pack (IN-11) — nothing reaches a client without a named approver on the ledger. Every other step is machine-executed with full provenance, and the client loop (IN-12…14 → IN-10) runs hands-free until it either closes the checklist or trips a loop-count/time guard to the RM. The client is touched through one coherent thread — a verification pack and, at most, targeted delta requests that explain exactly what's still needed and why.</p></div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer><div class="wrap">
+  CORPORATE CLIENT ONBOARDING TRANSFORMATION &middot; INTAKE STAGE DETAILED DESIGN — REVISION 2.1<br>
+  Supersedes Intake section (§3) of the Orchestration + Intake + Tax design &middot; Orchestration and Tax designs unchanged
+</div></footer>
+
+</body>
+</html>
