@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLMT — Intake Stage Technical Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B2A33; --muted:#5B6B74; --hairline:#D8DEDC; --paper:#F6F7F5; --panel:#FFFFFF;
+  --accent:#0F6B62;
+  --c-human:#A8681F; --c-api:#2D5FA6; --c-agent:#7A4FA6; --c-rules:#0F6B62;
+  --t-human:#F6EBDC; --t-api:#E2EAF6; --t-agent:#EEE7F6; --t-rules:#DFEEEC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.62}
+.wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+h1,h2,h3,h4{font-family:"Sora",sans-serif;line-height:1.18;letter-spacing:-0.015em}
+.mono{font-family:"IBM Plex Mono",monospace}
+.cover{border-bottom:3px solid var(--ink);padding:56px 0 40px;background:var(--panel)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.cover h1{font-size:40px;font-weight:800;margin:14px 0 16px;max-width:960px}
+.cover p.lede{font-size:18.5px;max-width:900px;color:var(--muted)}
+.cover .meta{display:flex;gap:36px;margin-top:26px;flex-wrap:wrap}
+.cover .meta div{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted)}
+.cover .meta b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+section{padding:48px 0 12px}
+.secnum{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.1em}
+h2{font-size:29px;font-weight:700;margin:6px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+h3{font-size:20px;font-weight:700;margin:32px 0 10px}
+h4{font-size:15.5px;font-weight:600;margin:22px 0 8px;font-family:"IBM Plex Mono",monospace;color:var(--accent);letter-spacing:.04em}
+p{margin:0 0 14px;max-width:940px}
+ul,ol{margin:0 0 16px 22px;max-width:920px}
+li{margin-bottom:7px}
+strong{font-weight:600}
+.callout{background:var(--panel);border-left:4px solid var(--accent);padding:16px 20px;margin:20px 0;max-width:940px}
+.callout p:last-child{margin-bottom:0}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 9px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.chip.human{background:var(--t-human);color:var(--c-human);border:1px solid var(--c-human)}
+.chip.api{background:var(--t-api);color:var(--c-api);border:1px solid var(--c-api)}
+.chip.agent{background:var(--t-agent);color:var(--c-agent);border:1px solid var(--c-agent)}
+.chip.rules{background:var(--t-rules);color:var(--c-rules);border:1px solid var(--c-rules)}
+table{width:100%;border-collapse:collapse;margin:18px 0 26px;background:var(--panel);font-size:14px}
+th{font-family:"Sora",sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.07em;text-align:left;padding:9px 11px;border-bottom:2px solid var(--ink)}
+td{padding:10px 11px;border-bottom:1px solid var(--hairline);vertical-align:top}
+td .stepid{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12.5px;white-space:nowrap}
+tr:hover td{background:#FBFCFB}
+figure{background:var(--panel);border:1px solid var(--hairline);border-top:3px solid var(--ink);margin:26px 0 32px;padding:22px 22px 14px}
+figcaption{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+figcaption b{color:var(--ink)}
+figure svg{width:100%;height:auto;display:block}
+pre{background:#FBFCFA;border:1px solid var(--hairline);border-left:3px solid var(--accent);padding:14px 16px;margin:12px 0 22px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.5;max-width:100%}
+code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:#EFF2EF;padding:1px 5px;border-radius:3px}
+pre code{background:none;padding:0}
+footer{border-top:3px solid var(--ink);margin-top:52px;padding:24px 0 44px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+@media print{
+  body{font-size:12px}
+  figure{break-inside:avoid}
+  pre{font-size:9.5px}
+  .a3fig{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="cover"><div class="wrap">
+  <div class="eyebrow">Technical Design Specification &middot; CLMT Platform &middot; Intake Stage</div>
+  <h1>CLMT — Intake Stage<br>Detailed Technical Design</h1>
+  <p class="lede">Component architecture, integration contracts, workflow implementation, case-level data objects (per task IN-01…IN-14), and the intake-stage domain data model (<span class="mono">Entity.Definition</span>, <span class="mono">Entity.Identifiers</span>, <span class="mono">Entity.Associations</span>, <span class="mono">Entity.Documents</span>) — on the mandated stack: React &middot; Kong &middot; Camunda 8 &middot; Drools &middot; PostgreSQL &middot; LangGraph.</p>
+  <div class="meta">
+    <div><b>Platform</b>CLMT — Client Lifecycle Mgmt</div>
+    <div><b>Scope</b>Intake stage (IN-01…IN-14)</div>
+    <div><b>Process ID</b>clmt-intake-v1</div>
+    <div><b>Status</b>Draft for architecture review</div>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<!-- ============================ 1. STACK ============================ -->
+<section id="stack">
+  <div class="secnum">SECTION 01</div>
+  <h2>Technology Stack &amp; Key Decisions</h2>
+
+  <table>
+    <tr><th style="width:210px">Concern</th><th style="width:260px">Selection</th><th>Role in the intake stage</th></tr>
+    <tr><td>UI</td><td><strong>React 18</strong> + Workbench BFF (Node/NestJS)</td><td>Case workbench for CM/Ops/Compliance; embeds Camunda Tasklist tasks via the Tasklist GraphQL/REST API; task forms are React components bound to the case-task JSON objects in §5.</td></tr>
+    <tr><td>API gateway</td><td><strong>Kong Gateway</strong> (ingress + egress)</td><td>Ingress: the CLMT <em>process API</em> for CRM (<span class="mono">POST /onboarding/v1/prospects</span>), the channel submission callback, and the workbench BFF route — OAuth2 client-credentials, mTLS, rate-limiting, schema validation plugins. Egress: single controlled exit for every external call (client master, external data platform, screening, checklist, SerpAPI, LLM) with per-upstream credentials, retries and circuit-breaking — so external integrations are governed in one place.</td></tr>
+    <tr><td>Workflow engine</td><td><strong>Camunda 8 (Zeebe)</strong> — chosen over Temporal, rationale below</td><td>Executes <span class="mono">clmt-intake-v1</span> BPMN: the sequential head, the parallel fan-out with the AND-join, human tasks (Tasklist), the client-response message catch, chaser timers, and the IN-14 → IN-10 loop.</td></tr>
+    <tr><td>Rules engine</td><td><strong>Drools</strong> (KIE Server) + DMN</td><td>IN-04 data-validation rule sets, match-confidence routing thresholds (IN-02), checklist dedupe and gap computation (IN-10), chaser cadence policy. Rules are versioned KIE containers; every evaluation returns fired-rule IDs into the task object for audit.</td></tr>
+    <tr><td>Database</td><td><strong>PostgreSQL 16</strong></td><td>Two schemas: <span class="mono">clmt_case</span> (master case + case tasks; task payloads as JSONB modelled 1:1 on the §5 objects) and <span class="mono">clmt_domain</span> (the Entity.* domain tables of §6). Document binaries in S3-compatible object storage; Postgres holds metadata + hashes.</td></tr>
+    <tr><td>Agentic runtime</td><td><strong>LangGraph</strong> (Python/FastAPI service)</td><td>Three graphs: <span class="mono">adverse-media-search</span> (IN-06, SerpAPI tools), <span class="mono">outreach-drafting</span> (IN-11), <span class="mono">doc-extraction</span> (IN-14). The service hosts Zeebe job workers, so agent steps are ordinary service tasks to the engine — with model/prompt versions and citations written back into the task object.</td></tr>
+    <tr><td>Identity &amp; secrets</td><td>Bank IdP (OIDC) + Vault</td><td>Workbench SSO via OIDC; service-to-service OAuth2 CC minted at Kong; external API credentials held in Vault, injected into Kong egress upstreams — never in service config.</td></tr>
+  </table>
+
+  <h3>1.1 &nbsp;Camunda 8 vs Temporal — why Camunda for this stage</h3>
+  <table>
+    <tr><th style="width:230px">Criterion</th><th>Camunda 8</th><th>Temporal</th></tr>
+    <tr><td>Human tasks (IN-02×2 verifications, IN-03 scope entry, IN-11 approval)</td><td><strong>Native.</strong> Tasklist with forms, claims, candidate groups, escalation — exactly the maker/checker machinery this stage needs.</td><td>Build-your-own: signals + a custom task inbox service. Significant custom code for four human touchpoints.</td></tr>
+    <tr><td>Message correlation (IN-13 client submission)</td><td>Native message catch events correlated on <span class="mono">caseId</span>; publish from the submission API or mailbox poller.</td><td>Signals — equivalent capability, code-defined.</td></tr>
+    <tr><td>Timers / chasers / loop guards</td><td>Boundary timer events (non-interrupting chasers; interrupting escalation) declared on the model.</td><td>Durable timers — equivalent, in code.</td></tr>
+    <tr><td>Auditability &amp; governance</td><td><strong>BPMN diagram = the reviewable artefact.</strong> Ops, audit and regulators read the same model the engine executes; Operate gives per-instance visual state.</td><td>Execution history is complete but code-shaped; needs tooling to present to non-engineers.</td></tr>
+    <tr><td>Agentic sub-flows</td><td>Delegated to LangGraph inside the agent service — the engine sees one job per agent step.</td><td>Genuinely stronger for code-first, long agent orchestration.</td></tr>
+  </table>
+  <p><strong>Decision:</strong> Camunda 8 (self-managed) executes the case spine, because this stage is dominated by human tasks, message correlation, timers, and audit-facing process governance — all native to Camunda. The agentic work stays in LangGraph where code-first orchestration belongs, invoked as Zeebe jobs. (If the bank later standardises on Temporal for engineering reasons, the §5 task objects and §6 domain model carry over unchanged — the coupling to the engine is confined to worker adapters.)</p>
+</section>
+<!-- ============================ 2. ARCHITECTURE ============================ -->
+<section id="architecture">
+  <div class="secnum">SECTION 02</div>
+  <h2>Technical Architecture (A3)</h2>
+  <p>The diagram below is proportioned for A3 landscape (a print-ready A3 PDF accompanies this document). Numbered badges on the connectors are indexed in the integration table that follows.</p>
+
+  <figure class="a3fig">
+    <svg viewBox="0 0 1587 1122" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+      <defs>
+        <marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1B2A33"/>
+        </marker>
+        <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5B6B74"/>
+        </marker>
+      </defs>
+
+      <!-- ===== External actors (top) ===== -->
+      <g font-size="12" text-anchor="middle" fill="#1B2A33">
+        <rect x="70" y="28" width="230" height="76" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.8"/>
+        <text x="185" y="58" font-weight="600">CRM (Salesforce)</text>
+        <text x="185" y="76" font-size="10.5" fill="#5B6B74">prospect origination</text>
+        <rect x="620" y="28" width="250" height="76" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.8"/>
+        <text x="745" y="58" font-weight="600">Client-Facing Channel</text>
+        <text x="745" y="76" font-size="10.5" fill="#5B6B74">portal · outreach + submissions</text>
+        <rect x="920" y="28" width="180" height="76" rx="5" fill="#fff" stroke="#5B6B74" stroke-dasharray="5 3"/>
+        <text x="1010" y="58" font-weight="600">Client</text>
+        <text x="1010" y="76" font-size="10.5" fill="#5B6B74">e-mail responses</text>
+        <rect x="1150" y="28" width="250" height="76" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.8"/>
+        <text x="1275" y="52" font-weight="600">Generic Onboarding Mailbox</text>
+        <text x="1275" y="70" font-size="10.5" fill="#5B6B74">Exchange Online / M365</text>
+        <text x="1275" y="86" font-size="10.5" fill="#5B6B74">shared mailbox per region</text>
+      </g>
+
+      <!-- ===== Kong ingress ===== -->
+      <rect x="70" y="150" width="780" height="86" rx="6" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="2"/>
+      <text x="86" y="176" font-size="13" font-weight="600" fill="#2D5FA6">KONG API GATEWAY — INGRESS</text>
+      <text x="86" y="194" font-size="10.5" fill="#5B6B74">OAuth2 client-credentials · mTLS · rate-limit · WAF · request/schema validation</text>
+      <g font-size="10" fill="#1B2A33">
+        <rect x="86" y="204" width="252" height="22" rx="3" fill="#fff" stroke="#2D5FA6"/><text x="94" y="219">POST /onboarding/v1/prospects</text>
+        <rect x="348" y="204" width="300" height="22" rx="3" fill="#fff" stroke="#2D5FA6"/><text x="356" y="219">POST /onboarding/v1/cases/{id}/submissions</text>
+        <rect x="658" y="204" width="176" height="22" rx="3" fill="#fff" stroke="#2D5FA6"/><text x="666" y="219">/workbench-bff/**</text>
+      </g>
+
+      <!-- ===== CLMT container ===== -->
+      <rect x="40" y="280" width="1120" height="736" rx="10" fill="#FDFDFC" stroke="#1B2A33" stroke-width="2.2"/>
+      <text x="64" y="306" font-size="13.5" font-weight="700" fill="#1B2A33">CLMT — CLIENT LIFECYCLE MANAGEMENT PLATFORM · INTAKE</text>
+
+      <!-- Row A -->
+      <g font-size="11.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="64" y="316" width="200" height="110" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="164" y="340" font-weight="600">React Workbench</text>
+        <text x="164" y="356" font-size="10" fill="#5B6B74">CM · Ops · Compliance</text>
+        <rect x="80" y="368" width="168" height="24" rx="3" fill="#F6F7F5" stroke="#5B6B74"/><text x="164" y="384" font-size="10">Workbench BFF (Node)</text>
+        <text x="164" y="412" font-size="10" fill="#5B6B74">OIDC SSO · task forms</text>
+
+        <rect x="290" y="316" width="340" height="110" rx="5" fill="#DFEEEC" stroke="#0F6B62" stroke-width="2"/>
+        <text x="460" y="338" font-weight="600" fill="#0F6B62">CAMUNDA 8 (self-managed)</text>
+        <g font-size="10">
+          <rect x="304" y="350" width="100" height="26" rx="3" fill="#fff" stroke="#0F6B62"/><text x="354" y="367">Zeebe broker</text>
+          <rect x="412" y="350" width="100" height="26" rx="3" fill="#fff" stroke="#0F6B62"/><text x="462" y="367">Tasklist</text>
+          <rect x="520" y="350" width="96" height="26" rx="3" fill="#fff" stroke="#0F6B62"/><text x="568" y="367">Operate</text>
+        </g>
+        <text x="460" y="398" font-size="10" fill="#5B6B74">BPMN: clmt-intake-v1 · gRPC 26500</text>
+        <text x="460" y="413" font-size="10" fill="#5B6B74">msg correlation on caseId · timers · loops</text>
+
+        <rect x="656" y="316" width="210" height="110" rx="5" fill="#DFEEEC" stroke="#0F6B62" stroke-width="1.6"/>
+        <text x="761" y="344" font-weight="600" fill="#0F6B62">Drools KIE Server</text>
+        <text x="761" y="364" font-size="10" fill="#5B6B74">IN-04 validation rule sets</text>
+        <text x="761" y="379" font-size="10" fill="#5B6B74">IN-02 match thresholds</text>
+        <text x="761" y="394" font-size="10" fill="#5B6B74">IN-10 dedupe + gap DMN</text>
+        <text x="761" y="409" font-size="10" fill="#5B6B74">versioned KIE containers</text>
+
+        <rect x="892" y="316" width="246" height="110" rx="5" fill="#EEE7F6" stroke="#7A4FA6" stroke-width="2"/>
+        <text x="1015" y="338" font-weight="600" fill="#7A4FA6">LangGraph Agent Service</text>
+        <g font-size="10">
+          <rect x="906" y="350" width="218" height="20" rx="3" fill="#fff" stroke="#7A4FA6"/><text x="1015" y="364">adverse-media-search (IN-06)</text>
+          <rect x="906" y="374" width="218" height="20" rx="3" fill="#fff" stroke="#7A4FA6"/><text x="1015" y="388">outreach-drafting (IN-11)</text>
+          <rect x="906" y="398" width="218" height="20" rx="3" fill="#fff" stroke="#7A4FA6"/><text x="1015" y="412">doc-extraction (IN-14)</text>
+        </g>
+      </g>
+
+      <!-- Row B: services -->
+      <g font-size="11" text-anchor="middle" fill="#1B2A33">
+        <rect x="64" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="148" y="510" font-weight="600">Case Management</text><text x="148" y="524" font-weight="600">Service</text>
+        <text x="148" y="544" font-size="9.5" fill="#5B6B74">process API · case + task</text>
+        <text x="148" y="557" font-size="9.5" fill="#5B6B74">lifecycle · starts BPMN</text>
+        <rect x="246" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="330" y="510" font-weight="600">Domain Data</text><text x="330" y="524" font-weight="600">Service</text>
+        <text x="330" y="544" font-size="9.5" fill="#5B6B74">Entity.Definition · Identifiers</text>
+        <text x="330" y="557" font-size="9.5" fill="#5B6B74">Associations · Documents</text>
+        <rect x="428" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="512" y="510" font-weight="600">Document</text><text x="512" y="524" font-weight="600">Service</text>
+        <text x="512" y="544" font-size="9.5" fill="#5B6B74">evidence intake · AV scan</text>
+        <text x="512" y="557" font-size="9.5" fill="#5B6B74">hashing · S3 metadata</text>
+        <rect x="610" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="694" y="510" font-weight="600">Connector</text><text x="694" y="524" font-weight="600">Service</text>
+        <text x="694" y="544" font-size="9.5" fill="#5B6B74">clients for all external APIs</text>
+        <text x="694" y="557" font-size="9.5" fill="#5B6B74">idempotency keys · mapping</text>
+        <rect x="792" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="876" y="510" font-weight="600">Outreach</text><text x="876" y="524" font-weight="600">Service</text>
+        <text x="876" y="544" font-size="9.5" fill="#5B6B74">channel dispatch · e-mail</text>
+        <text x="876" y="557" font-size="9.5" fill="#5B6B74">content-hash lock · chasers</text>
+        <rect x="974" y="486" width="168" height="104" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1058" y="510" font-weight="600">Mailbox Poller</text><text x="1058" y="524" font-weight="600">Service</text>
+        <text x="1058" y="544" font-size="9.5" fill="#5B6B74">Graph API poll · matcher</text>
+        <text x="1058" y="557" font-size="9.5" fill="#5B6B74">publishes Zeebe message</text>
+      </g>
+
+      <!-- Row C: data -->
+      <g font-size="11" text-anchor="middle" fill="#1B2A33">
+        <rect x="64" y="666" width="360" height="110" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.8"/>
+        <text x="244" y="690" font-weight="600">PostgreSQL 16 (HA / Patroni)</text>
+        <text x="244" y="710" font-size="10" fill="#5B6B74">clmt_case: onboarding_case · case_task (JSONB)</text>
+        <text x="244" y="725" font-size="10" fill="#5B6B74">outreach_request · client_submission</text>
+        <text x="244" y="740" font-size="10" fill="#5B6B74">clmt_domain: entity_definition · entity_identifier</text>
+        <text x="244" y="755" font-size="10" fill="#5B6B74">entity_association · entity_document</text>
+        <rect x="452" y="666" width="210" height="110" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="557" y="696" font-weight="600">Object Store (S3)</text>
+        <text x="557" y="716" font-size="10" fill="#5B6B74">document binaries</text>
+        <text x="557" y="731" font-size="10" fill="#5B6B74">versioned · object-lock (WORM)</text>
+        <rect x="690" y="666" width="200" height="110" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="790" y="696" font-weight="600">Elasticsearch</text>
+        <text x="790" y="716" font-size="10" fill="#5B6B74">Camunda exporter indices</text>
+        <text x="790" y="731" font-size="10" fill="#5B6B74">Operate · Tasklist</text>
+        <rect x="918" y="666" width="220" height="110" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1028" y="696" font-weight="600">Vault + Bank IdP</text>
+        <text x="1028" y="716" font-size="10" fill="#5B6B74">external API credentials</text>
+        <text x="1028" y="731" font-size="10" fill="#5B6B74">OIDC for workbench SSO</text>
+      </g>
+
+      <!-- Legend + deployment -->
+      <g font-size="10.5" fill="#1B2A33">
+        <rect x="64" y="810" width="560" height="170" rx="5" fill="#F6F7F5" stroke="#5B6B74" stroke-dasharray="3 3"/>
+        <text x="80" y="834" font-weight="600" font-size="11">LEGEND — CONNECTOR STYLES</text>
+        <line x1="80" y1="854" x2="150" y2="854" stroke="#1B2A33" stroke-width="1.6" marker-end="url(#ma)"/><text x="162" y="858">synchronous REST/JSON over HTTPS</text>
+        <line x1="80" y1="880" x2="150" y2="880" stroke="#1B2A33" stroke-width="3" marker-end="url(#ma)"/><text x="162" y="884">gRPC (Zeebe job workers / process start)</text>
+        <line x1="80" y1="906" x2="150" y2="906" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#mb)"/><text x="162" y="910">asynchronous — polling / message publish</text>
+        <line x1="80" y1="932" x2="150" y2="932" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="2 3" marker-end="url(#mb)"/><text x="162" y="936">persistence — JDBC / S3 API / ES exporter</text>
+        <circle cx="88" cy="958" r="10" fill="#1B2A33"/><text x="88" y="962" font-size="10" fill="#fff" text-anchor="middle">n</text><text x="106" y="962">numbered badge → integration table (§2.1)</text>
+
+        <rect x="650" y="810" width="488" height="170" rx="5" fill="#F6F7F5" stroke="#5B6B74" stroke-dasharray="3 3"/>
+        <text x="666" y="834" font-weight="600" font-size="11">DEPLOYMENT NOTES</text>
+        <text x="666" y="856">· Kubernetes/OpenShift, one CLMT namespace per region</text>
+        <text x="666" y="874">· NetworkPolicy: pods egress ONLY via Kong egress</text>
+        <text x="666" y="892">· Zeebe 3-broker cluster, partitions=3, replication=3</text>
+        <text x="666" y="910">· Postgres HA (Patroni) + PITR; S3 WORM for evidence</text>
+        <text x="666" y="928">· Agent service GPU-optional; LLM calls via egress only</text>
+        <text x="666" y="946">· All task/case writes carry actor + correlation IDs (audit)</text>
+      </g>
+
+      <!-- ===== Kong egress band ===== -->
+      <rect x="1180" y="300" width="104" height="640" rx="6" fill="#E2EAF6" stroke="#2D5FA6" stroke-width="2"/>
+      <text transform="rotate(-90,1232,620)" x="1232" y="620" font-size="12.5" font-weight="600" fill="#2D5FA6" text-anchor="middle">KONG API GATEWAY — EGRESS · mTLS · OAuth2 CC · retry · circuit-break · per-upstream credentials (Vault)</text>
+
+      <!-- ===== External APIs column ===== -->
+      <g font-size="11.5" text-anchor="middle" fill="#1B2A33">
+        <rect x="1320" y="300" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="326" font-weight="600">Client Master API</text>
+        <text x="1445" y="344" font-size="10" fill="#5B6B74">match search · link (IN-02a)</text>
+
+        <rect x="1320" y="378" width="250" height="118" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="402" font-weight="600">External Data Platform</text>
+        <text x="1445" y="418" font-size="10" fill="#5B6B74">name resolution · profile · ownership</text>
+        <g font-size="9.5">
+          <rect x="1332" y="428" width="112" height="24" rx="3" fill="#F6F7F5" stroke="#5B6B74"/><text x="1388" y="444">Moody's</text>
+          <rect x="1450" y="428" width="110" height="24" rx="3" fill="#F6F7F5" stroke="#5B6B74"/><text x="1505" y="444">IHS Markit</text>
+          <rect x="1332" y="458" width="112" height="24" rx="3" fill="#F6F7F5" stroke="#5B6B74"/><text x="1388" y="474">SWIFT KYC</text>
+          <rect x="1450" y="458" width="110" height="24" rx="3" fill="#F6F7F5" stroke="#5B6B74"/><text x="1505" y="474">GLEIF</text>
+        </g>
+
+        <rect x="1320" y="510" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="536" font-weight="600">Name Screening API</text>
+        <text x="1445" y="554" font-size="10" fill="#5B6B74">sanctions · PEP indication (IN-07)</text>
+        <rect x="1320" y="588" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="614" font-weight="600">Reg Classification API</text>
+        <text x="1445" y="632" font-size="10" fill="#5B6B74">MiFID · Dodd-Frank etc. (IN-08)</text>
+        <rect x="1320" y="666" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="692" font-weight="600">Client Risk Assessment API</text>
+        <text x="1445" y="710" font-size="10" fill="#5B6B74">rating A–E (IN-09)</text>
+        <rect x="1320" y="744" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="770" font-weight="600">Document Checklist API</text>
+        <text x="1445" y="788" font-size="10" fill="#5B6B74">required attributes + evidence (IN-10)</text>
+        <rect x="1320" y="822" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="848" font-weight="600">SerpAPI</text>
+        <text x="1445" y="866" font-size="10" fill="#5B6B74">web search for IN-06 agent</text>
+        <rect x="1320" y="900" width="250" height="64" rx="5" fill="#fff" stroke="#1B2A33" stroke-width="1.6"/>
+        <text x="1445" y="926" font-weight="600">LLM API</text>
+        <text x="1445" y="944" font-size="10" fill="#5B6B74">IN-06 · IN-11 · IN-14 graphs</text>
+      </g>
+
+      <!-- ===== Connectors ===== -->
+      <!-- 1: CRM -> Kong -->
+      <path d="M185,104 L185,146" stroke="#1B2A33" stroke-width="1.8" fill="none" marker-end="url(#ma)"/>
+      <circle cx="185" cy="126" r="10" fill="#1B2A33"/><text x="185" y="130" font-size="10" fill="#fff" text-anchor="middle">1</text>
+      <!-- 3: Channel -> Kong -->
+      <path d="M745,104 L745,146" stroke="#1B2A33" stroke-width="1.8" fill="none" marker-end="url(#ma)"/>
+      <circle cx="745" cy="126" r="10" fill="#1B2A33"/><text x="745" y="130" font-size="10" fill="#fff" text-anchor="middle">3</text>
+      <!-- 2: Kong -> Case Mgmt -->
+      <path d="M120,236 L120,258 L54,258 L54,538 L60,538" stroke="#1B2A33" stroke-width="1.8" fill="none" marker-end="url(#ma)"/>
+      <circle cx="54" cy="400" r="10" fill="#1B2A33"/><text x="54" y="404" font-size="10" fill="#fff" text-anchor="middle">2</text>
+      <!-- 4: React <-> Tasklist -->
+      <path d="M264,371 L286,371" stroke="#1B2A33" stroke-width="1.6" fill="none" marker-end="url(#ma)" marker-start="url(#ma)"/>
+      <circle cx="275" cy="352" r="10" fill="#1B2A33"/><text x="275" y="356" font-size="10" fill="#fff" text-anchor="middle">4</text>
+      <!-- 5: Camunda <-> services gRPC -->
+      <path d="M460,426 L460,480" stroke="#1B2A33" stroke-width="3" fill="none" marker-end="url(#ma)" marker-start="url(#ma)"/>
+      <circle cx="460" cy="454" r="10" fill="#1B2A33"/><text x="460" y="458" font-size="10" fill="#fff" text-anchor="middle">5</text>
+      <!-- 5b: Agent svc workers (annotation) -->
+      <text x="1015" y="446" font-size="10" fill="#5B6B74" text-anchor="middle">also a Zeebe job worker — gRPC, badge 5</text>
+      <!-- 6: services -> Drools -->
+      <path d="M761,480 L761,430" stroke="#1B2A33" stroke-width="1.6" fill="none" marker-end="url(#ma)"/>
+      <circle cx="761" cy="456" r="10" fill="#1B2A33"/><text x="761" y="460" font-size="10" fill="#fff" text-anchor="middle">6</text>
+      <!-- 7: Connector -> egress -->
+      <path d="M694,590 L694,628 L1162,628 L1162,560 L1176,560" stroke="#1B2A33" stroke-width="1.8" fill="none" marker-end="url(#ma)"/>
+      <circle cx="940" cy="628" r="10" fill="#1B2A33"/><text x="940" y="632" font-size="10" fill="#fff" text-anchor="middle">7</text>
+      <!-- 14: Agent -> egress -->
+      <path d="M1138,371 L1176,371" stroke="#1B2A33" stroke-width="1.6" fill="none" marker-end="url(#ma)"/>
+      <circle cx="1146" cy="352" r="10" fill="#1B2A33"/><text x="1146" y="356" font-size="10" fill="#fff" text-anchor="middle">14</text>
+      <!-- egress -> externals 8..13,15,16 -->
+      <g stroke="#1B2A33" stroke-width="1.6" fill="none" marker-end="url(#ma)">
+        <path d="M1284,332 L1316,332"/><path d="M1284,437 L1316,437"/><path d="M1284,542 L1316,542"/>
+        <path d="M1284,620 L1316,620"/><path d="M1284,698 L1316,698"/><path d="M1284,776 L1316,776"/>
+        <path d="M1284,854 L1316,854"/><path d="M1284,932 L1316,932"/>
+      </g>
+      <g font-size="10" fill="#fff" text-anchor="middle">
+        <circle cx="1300" cy="332" r="10" fill="#1B2A33"/><text x="1300" y="336">8</text>
+        <circle cx="1300" cy="437" r="10" fill="#1B2A33"/><text x="1300" y="441">9</text>
+        <circle cx="1300" cy="542" r="10" fill="#1B2A33"/><text x="1300" y="546">10</text>
+        <circle cx="1300" cy="620" r="10" fill="#1B2A33"/><text x="1300" y="624">11</text>
+        <circle cx="1300" cy="698" r="10" fill="#1B2A33"/><text x="1300" y="702">12</text>
+        <circle cx="1300" cy="776" r="10" fill="#1B2A33"/><text x="1300" y="780">13</text>
+        <circle cx="1300" cy="854" r="10" fill="#1B2A33"/><text x="1300" y="858">15</text>
+        <circle cx="1300" cy="932" r="10" fill="#1B2A33"/><text x="1300" y="936">16</text>
+      </g>
+      <!-- 17: Outreach -> Channel (corridor x=876) -->
+      <path d="M876,486 L876,126 L800,126 L800,108" stroke="#1B2A33" stroke-width="1.8" fill="none" marker-end="url(#ma)"/>
+      <circle cx="876" cy="262" r="10" fill="#1B2A33"/><text x="876" y="266" font-size="10" fill="#fff" text-anchor="middle">17</text>
+      <!-- 18: Outreach -> Mailbox sendMail -->
+      <path d="M876,140 L1230,140 L1230,108" stroke="#1B2A33" stroke-width="1.6" fill="none" marker-end="url(#ma)"/>
+      <circle cx="1052" cy="140" r="10" fill="#1B2A33"/><text x="1052" y="144" font-size="10" fill="#fff" text-anchor="middle">18</text>
+      <!-- 19: Client -> Mailbox -->
+      <path d="M1100,66 L1146,66" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+      <circle cx="1123" cy="48" r="10" fill="#1B2A33"/><text x="1123" y="52" font-size="10" fill="#fff" text-anchor="middle">19</text>
+      <!-- Client -> Channel -->
+      <path d="M916,66 L878,66" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+      <!-- 20: Poller -> Mailbox poll -->
+      <path d="M1058,486 L1058,460 L1162,460 L1162,130 L1200,130 L1200,108" stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+      <circle cx="1162" cy="286" r="10" fill="#1B2A33"/><text x="1162" y="290" font-size="10" fill="#fff" text-anchor="middle">20</text>
+      <!-- 21: persistence -->
+      <g stroke="#5B6B74" stroke-width="1.6" stroke-dasharray="2 3" fill="none" marker-end="url(#mb)">
+        <path d="M148,590 L148,662"/>
+        <path d="M330,590 L330,662"/>
+        <path d="M512,590 C512,632 545,632 545,662"/>
+        <path d="M602,426 L602,648 L740,648 L740,662"/>
+      </g>
+      <circle cx="148" cy="626" r="10" fill="#1B2A33"/><text x="148" y="630" font-size="10" fill="#fff" text-anchor="middle">21</text>
+      <text x="64" y="640" font-size="10" fill="#5B6B74">Spring Boot services — each hosts Zeebe job workers (gRPC 26500)</text>
+    </svg>
+    <figcaption><b>Figure 1 — CLMT intake technical architecture (A3 landscape).</b> Kong terminates all north-south traffic (ingress) and all outbound external calls (egress). Camunda 8 executes the case spine; services and the LangGraph agent service attach as Zeebe job workers; Drools serves versioned rule evaluations; PostgreSQL holds case + domain schemas with document binaries in S3.</figcaption>
+  </figure>
+
+  <h3>2.1 &nbsp;Integration inventory</h3>
+  <table>
+    <tr><th style="width:44px">#</th><th style="width:270px">From → To</th><th style="width:250px">Protocol / pattern</th><th>Purpose &amp; steps served</th></tr>
+    <tr><td>1</td><td>CRM → Kong ingress</td><td>REST/JSON · HTTPS · OAuth2 CC + mTLS</td><td><span class="mono">POST /onboarding/v1/prospects</span> — the CLMT process API. Idempotency on <span class="mono">crmOpportunityId</span>. (IN-01)</td></tr>
+    <tr><td>2</td><td>Kong ingress → Case Management Service</td><td>REST/JSON (routed) · rate-limited · schema-validated</td><td>Routes the process API and submission callback to the Case Management Service, which creates the master case and starts <span class="mono">clmt-intake-v1</span>.</td></tr>
+    <tr><td>3</td><td>Client Channel → Kong ingress</td><td>REST/JSON webhook · OAuth2 CC + mTLS</td><td><span class="mono">POST /onboarding/v1/cases/{id}/submissions</span> — channel notifies CLMT of client submissions. (IN-13)</td></tr>
+    <tr><td>4</td><td>React Workbench ↔ Camunda Tasklist</td><td>Tasklist REST/GraphQL via BFF · OIDC user context</td><td>Human tasks: IN-02 match verifications (×2), IN-03 scope entry, IN-11 outreach approval. Forms bind to the §5 task JSON.</td></tr>
+    <tr><td>5</td><td>Camunda Zeebe ↔ all services + agent service</td><td><strong>gRPC 26500</strong> · job activate/complete/fail · process start</td><td>Every automated step is a Zeebe job; every human step a Tasklist user task; message publish for IN-13 correlation.</td></tr>
+    <tr><td>6</td><td>Services → Drools KIE Server</td><td>REST/JSON (KIE execution API) · versioned containers</td><td>IN-02 match-confidence thresholds; IN-04 attribute validation; IN-10 checklist dedupe + gap rules. Fired-rule IDs returned into task objects.</td></tr>
+    <tr><td>7</td><td>Connector Service → Kong egress</td><td>REST/JSON · per-upstream OAuth2/mTLS creds from Vault · retries + circuit-break</td><td>Single controlled exit for all external calls below.</td></tr>
+    <tr><td>8</td><td>Egress → Client Master API</td><td>REST/JSON</td><td>Match search on name + incorporation country + number; link case to client-master number on certain match. (IN-02a)</td></tr>
+    <tr><td>9</td><td>Egress → External Data Platform</td><td>REST/JSON</td><td>Name resolution returning Moody's / IHS Markit / SWIFT KYC / GLEIF identifiers (IN-02b); full profile fetch by resolved ID (IN-04); ownership fetch (IN-05).</td></tr>
+    <tr><td>10</td><td>Egress → Name Screening API</td><td>REST/JSON</td><td>Screen entity + ownership associations; upfront sanctions/PEP indication. (IN-07)</td></tr>
+    <tr><td>11</td><td>Egress → Reg Classification API</td><td>REST/JSON</td><td>Applicable classifications (MiFID, Dodd-Frank, EMIR…) for FM products. (IN-08)</td></tr>
+    <tr><td>12</td><td>Egress → Client Risk Assessment API</td><td>REST/JSON</td><td>Client risk rating A–E (A/B = low risk). (IN-09)</td></tr>
+    <tr><td>13</td><td>Egress → Document Checklist API</td><td>REST/JSON</td><td>Required attributes + evidence documents by data profile × rating × jurisdictions × products. (IN-10)</td></tr>
+    <tr><td>14</td><td>Agent Service → Kong egress</td><td>REST/JSON</td><td>Agent tool calls exit through the same egress governance as everything else.</td></tr>
+    <tr><td>15</td><td>Egress → SerpAPI</td><td>REST/JSON · quota-limited at Kong</td><td>Web search tool of the IN-06 adverse-media LangGraph graph.</td></tr>
+    <tr><td>16</td><td>Egress → LLM API</td><td>REST/JSON · token-budget plugin</td><td>Model calls for the IN-06, IN-11 and IN-14 graphs; model + prompt versions logged to task objects.</td></tr>
+    <tr><td>17</td><td>Outreach Service → Client Channel</td><td>REST/JSON (channel API, via egress policy)</td><td>Dispatch the approved outreach pack to the portal. (IN-12)</td></tr>
+    <tr><td>18</td><td>Outreach Service → Generic Mailbox</td><td>MS Graph <span class="mono">sendMail</span> (or SMTP relay)</td><td>E-mail dispatch from the generic mailbox for clients not on the channel. (IN-12)</td></tr>
+    <tr><td>19</td><td>Client → Generic Mailbox</td><td>SMTP (inbound e-mail)</td><td>Clients replying with documents by e-mail.</td></tr>
+    <tr><td>20</td><td>Mailbox Poller → Generic Mailbox</td><td>MS Graph delta query (poll, e.g. 60s) / IMAP fallback</td><td>Detect client replies; match sender + case reference; store attachments via Document Service; publish Zeebe message <span class="mono">client-submission</span>. (IN-13)</td></tr>
+    <tr><td>21</td><td>Services → PostgreSQL / S3 / ES</td><td>JDBC (HikariCP) · S3 API · Camunda ES exporter</td><td>Case + task JSONB and domain tables in Postgres; binaries in S3 (WORM); Operate/Tasklist indices in Elasticsearch.</td></tr>
+  </table>
+</section>
+<!-- ============================ 3. WORKFLOW ============================ -->
+<section id="workflow">
+  <div class="secnum">SECTION 03</div>
+  <h2>Workflow Implementation — <span class="mono">clmt-intake-v1</span></h2>
+  <p>One BPMN process per master case. Task-to-element mapping below; every service task is a Zeebe job with a typed job type, retried with backoff, and idempotent via a key derived from <span class="mono">(caseId, taskId, attempt)</span>.</p>
+  <table>
+    <tr><th style="width:70px">Step</th><th style="width:250px">BPMN element(s)</th><th style="width:210px">Job type / form</th><th>Notes</th></tr>
+    <tr><td><span class="stepid">IN-01</span></td><td>Start: process instance created by Case Mgmt Svc on <span class="mono">POST /prospects</span> → service task <em>create-master-case</em></td><td><span class="mono">case.create</span></td><td>Case row + <span class="mono">Entity.Definition</span> seed written before instance start so the process always references a persisted case.</td></tr>
+    <tr><td><span class="stepid">IN-02</span></td><td>Service task <em>client-master-search</em> → user task <em>verify-cm-matches</em> → XOR gateway → [certain match] service task <em>link-and-close</em> → <strong>end event (case closed)</strong> / [no match] service task <em>external-name-resolution</em> → user task <em>verify-ext-matches</em></td><td><span class="mono">clientmaster.search</span> · form <span class="mono">F-IN02A</span> · <span class="mono">edp.resolve</span> · form <span class="mono">F-IN02B</span></td><td>Human verification is mandatory on both checks — even a "perfect" API match is confirmed by a person before linking or accepting external IDs. Drools supplies the ranking thresholds shown in the form.</td></tr>
+    <tr><td><span class="stepid">IN-03</span></td><td>User task <em>capture-scope</em></td><td>form <span class="mono">F-IN03</span> (CM group)</td><td>Jurisdictions + products; on complete, sets process variables that drive the IN-08 conditional flow and all downstream API payloads.</td></tr>
+    <tr><td>—</td><td><strong>Parallel gateway (fork)</strong> — five outgoing flows</td><td>—</td><td>IN-08 flow has a condition: <span class="mono">hasFMProducts = true</span>; otherwise that token skips to its join.</td></tr>
+    <tr><td><span class="stepid">IN-04</span></td><td>Service task <em>edp-fetch-profiles</em> → business rule task <em>validate-profile</em> (Drools)</td><td><span class="mono">edp.profile.fetch</span> · <span class="mono">rules.validate</span></td><td>One fetch per resolved external ID; validation results (per-rule pass/fail) land in the task object and on screen.</td></tr>
+    <tr><td><span class="stepid">IN-05</span></td><td>Service task <em>edp-fetch-ownership</em></td><td><span class="mono">edp.ownership.fetch</span></td><td>Writes <span class="mono">Entity.Associations</span>; sets <span class="mono">ownershipAvailable</span> variable consumed by IN-07's payload builder (soft input — no sequence dependency).</td></tr>
+    <tr><td><span class="stepid">IN-06</span></td><td>Service task <em>agent-adverse-media</em></td><td><span class="mono">agent.adversemedia</span> (agent svc worker)</td><td>LangGraph graph: plan queries → SerpAPI search → filter/dedupe → summarise with links → "nothing found" verdict when empty. Long-poll job with heartbeat; timeout + retry safe (idempotent run key).</td></tr>
+    <tr><td><span class="stepid">IN-07</span></td><td>Service task <em>name-screening</em></td><td><span class="mono">screening.submit</span></td><td>Payload = entity + any ownership associations available at execution time (from IN-05 if done). Returns upfront sanctions/PEP indication into the task object.</td></tr>
+    <tr><td><span class="stepid">IN-08</span></td><td>Service task <em>regclass-determine</em> (conditional flow)</td><td><span class="mono">regclass.determine</span></td><td>Output = classifications to perform (MiFID, Dodd-Frank, …) + questionnaires — consumed by IN-10's checklist merge.</td></tr>
+    <tr><td>—</td><td><strong>Parallel join A</strong> = IN-04 + IN-06 + IN-07 → <span class="stepid">IN-09</span> service task <em>client-risk-assessment</em> → <strong>Parallel join B</strong> = (IN-09 path) + IN-05 + IN-08 tokens</td><td><span class="mono">cra.assess</span></td><td>Matches the approved dependency model: IN-05/IN-08 never gate IN-09; all tokens converge before IN-10.</td></tr>
+    <tr><td><span class="stepid">IN-10</span></td><td>Service task <em>doc-checklist-fetch</em> → business rule task <em>dedupe-and-gap</em> (Drools) → XOR gateway: [no gaps] → <strong>end event stage-complete</strong> / [gaps] → IN-11</td><td><span class="mono">checklist.fetch</span> · <span class="mono">rules.gap</span></td><td>Gap rule: items satisfiable by already-sourced external data are auto-marked <span class="mono">SATISFIED_BY_EXTERNAL_DATA</span> (no document evidence needed); remainder require evidence. Loop counter increments on each entry.</td></tr>
+    <tr><td><span class="stepid">IN-11</span></td><td>Service task <em>agent-draft-outreach</em> → user task <em>verify-outreach</em> → XOR: [rejected] back to draft / [approved] proceed</td><td><span class="mono">agent.outreach.draft</span> · form <span class="mono">F-IN11</span></td><td>Approval writes approver + SHA-256 content hash into the task object; IN-12 dispatches that exact hash.</td></tr>
+    <tr><td><span class="stepid">IN-12</span></td><td>XOR by channel: service task <em>dispatch-channel</em> or <em>dispatch-email</em>; <strong>non-interrupting boundary timers</strong> for chasers on the following catch state</td><td><span class="mono">outreach.channel</span> · <span class="mono">outreach.email</span></td><td>Chaser cadence parameters from Drools policy; chasers reference the original pack.</td></tr>
+    <tr><td><span class="stepid">IN-13</span></td><td><strong>Intermediate message catch event</strong> <span class="mono">client-submission</span>, correlation key = <span class="mono">caseId</span>; interrupting boundary timer → RM escalation user task on stall</td><td>message published by Case Mgmt Svc (channel API) or Mailbox Poller</td><td>Partial submissions re-publish the message per batch; the catch is re-armed inside the loop so multiple deliveries are consumed.</td></tr>
+    <tr><td><span class="stepid">IN-14</span></td><td>Service task <em>agent-extract-enrich</em> → sequence flow back to IN-10</td><td><span class="mono">agent.extract</span></td><td>LangGraph doc-extraction graph per document; low-confidence fields spawn a targeted user task <em>verify-extraction</em> before enrichment applies. Loop guard: <span class="mono">loopCount &gt; N</span> or elapsed &gt; T → escalation path.</td></tr>
+  </table>
+</section>
+
+<!-- ============================ 4. API CONTRACTS ============================ -->
+<section id="apis">
+  <div class="secnum">SECTION 04</div>
+  <h2>CLMT API Contracts (Kong-published)</h2>
+
+  <h4>4.1 &nbsp;Process API — prospect intake (IN-01)</h4>
+<pre><code>POST /onboarding/v1/prospects
+Authorization: Bearer &lt;oauth2-cc-token&gt;        Idempotency-Key: SFDC-OPP-004512
+
+{
+  "source": { "system": "SFDC", "opportunityId": "OPP-004512", "relationshipManager": "u-4471" },
+  "prospect": {
+    "entityName": "Meridian Commodities Trading Pte. Ltd.",
+    "incorporationCountry": "SG",
+    "incorporationNumber": "201812345K",
+    "addresses": [
+      { "type": "REGISTERED", "line1": "8 Marina Boulevard #12-01",
+        "city": "Singapore", "postalCode": "018981", "country": "SG" }
+    ]
+  },
+  "opportunityProducts": ["CASH_MGMT", "FX", "TRADE_FINANCE"]
+}
+
+HTTP/1.1 202 Accepted
+{
+  "caseId": "CLMT-2026-081201",
+  "processInstanceKey": "2251799813728431",
+  "status": "INTAKE_IN_PROGRESS",
+  "statusCallback": "/onboarding/v1/cases/CLMT-2026-081201"
+}</code></pre>
+
+  <h4>4.2 &nbsp;Submission callback — channel → CLMT (IN-13)</h4>
+<pre><code>POST /onboarding/v1/cases/CLMT-2026-081201/submissions
+{
+  "channel": "CLIENT_PORTAL",
+  "submittedAt": "2026-08-19T06:42:10Z",
+  "items": [
+    { "requirementCode": "DOC-COI", "type": "DOCUMENT",
+      "fileName": "certificate_of_incumbency.pdf", "sha256": "9f2b…c41a",
+      "contentRef": "s3://clmt-sg-evidence/CLMT-2026-081201/inbound/9f2b…c41a.pdf" },
+    { "requirementCode": "ATTR-NATURE-OF-BUSINESS", "type": "DATA_CONFIRMATION",
+      "value": "Physical commodity trading — energy and metals", "confirmed": true }
+  ]
+}
+
+HTTP/1.1 202 Accepted   → publishes Zeebe message "client-submission" (correlationKey = caseId)</code></pre>
+
+  <p>Read-model endpoints for the workbench (<span class="mono">GET /cases/{id}</span>, <span class="mono">GET /cases/{id}/tasks</span>, <span class="mono">GET /cases/{id}/entity</span>) return the case, task objects (§5) and domain objects (§6) respectively; CRM subscribes to <span class="mono">GET /cases/{id}</span> status or receives webhooks on stage transitions.</p>
+</section>
+<!-- ============================ 5. CASE DATA OBJECTS ============================ -->
+<section id="caseobjects">
+  <div class="secnum">SECTION 05</div>
+  <h2>Case-Level Data Objects (per task)</h2>
+  <p>Every task instance persists one JSON object in <span class="mono">clmt_case.case_task.payload</span> (JSONB). All tasks share the envelope below; the per-task <span class="mono">data</span> payloads follow. These objects are the contract from which the relational model in §6 is derived. Sample entity throughout: <em>Meridian Commodities Trading Pte. Ltd.</em> (SG, UEN 201812345K).</p>
+
+  <h4>5.0 &nbsp;Master case object + common task envelope</h4>
+<pre><code>// clmt_case.onboarding_case
+{
+  "caseId": "CLMT-2026-081201",
+  "caseType": "CORPORATE_ONBOARDING",
+  "stage": "INTAKE",
+  "status": "IN_PROGRESS",                       // IN_PROGRESS | CLOSED_LINKED | STAGE_COMPLETE | CANCELLED
+  "entityRef": "ENT-000871",                     // FK → clmt_domain.entity_definition
+  "clientMasterId": null,                        // set + case closed on IN-02 certain match
+  "source": { "system": "SFDC", "opportunityId": "OPP-004512", "relationshipManager": "u-4471" },
+  "riskRating": null,                            // set by IN-09
+  "loopCount": 0,                                // IN-10 iterations
+  "processInstanceKey": "2251799813728431",
+  "createdAt": "2026-08-12T03:15:22Z", "updatedAt": "2026-08-12T03:15:22Z"
+}
+
+// common task envelope (clmt_case.case_task)
+{
+  "taskId": "CLMT-2026-081201-T02",
+  "caseId": "CLMT-2026-081201",
+  "taskCode": "IN-02",
+  "taskType": "HYBRID",                          // API | RULES | AGENTIC | HUMAN | HYBRID
+  "status": "COMPLETED",                         // PENDING | ACTIVE | WAITING_HUMAN | COMPLETED | FAILED
+  "camunda": { "elementId": "verify-cm-matches", "jobKeys": ["4503599627490112"] },
+  "startedAt": "2026-08-12T03:15:40Z",
+  "completedAt": "2026-08-12T05:02:11Z",
+  "data": { "…": "per-task payload, below" },
+  "audit": [
+    { "event": "JOB_COMPLETED", "actor": "svc-connector", "at": "2026-08-12T03:16:02Z" },
+    { "event": "HUMAN_DECISION", "actor": "u-2210", "at": "2026-08-12T05:02:11Z" }
+  ]
+}</code></pre>
+
+  <h4>IN-01 · Prospect received — <span class="chip api">API / STP</span></h4>
+<pre><code>"data": {
+  "inbound": { "idempotencyKey": "SFDC-OPP-004512", "payloadRef": "s3://clmt-sg-case/CLMT-2026-081201/in01-request.json" },
+  "schemaValidation": { "schema": "prospect-v1.3", "result": "PASS" },
+  "prospect": {
+    "entityName": "Meridian Commodities Trading Pte. Ltd.",
+    "incorporationCountry": "SG", "incorporationNumber": "201812345K",
+    "addresses": [ { "type": "REGISTERED", "line1": "8 Marina Boulevard #12-01", "city": "Singapore", "postalCode": "018981", "country": "SG" } ]
+  },
+  "caseCreated": { "caseId": "CLMT-2026-081201", "entityRef": "ENT-000871" },
+  "crmAck": { "status": 202, "sentAt": "2026-08-12T03:15:23Z" }
+}</code></pre>
+
+  <h4>IN-02 · Entity resolution &amp; de-dupe — <span class="chip api">API</span> + <span class="chip human">Human</span> (two checks)</h4>
+<pre><code>"data": {
+  "clientMasterCheck": {
+    "request": { "entityName": "Meridian Commodities Trading Pte. Ltd.", "incorporationCountry": "SG", "incorporationNumber": "201812345K" },
+    "matches": [
+      { "clientMasterId": "CM-88231045", "name": "Meridian Commodities (Asia) Ltd.", "country": "HK", "score": 0.71, "matchGrade": "POSSIBLE" }
+    ],
+    "droolsRouting": { "kieContainer": "clmt-matching:2.4.0", "threshold": { "certain": 0.93, "review": 0.60 }, "route": "HUMAN_REVIEW" },
+    "humanVerification": { "decision": "NO_MATCH", "reviewedMatches": ["CM-88231045"], "rationale": "Different legal entity — HK affiliate, distinct UEN", "verifiedBy": "u-2210", "verifiedAt": "2026-08-12T04:41:05Z" },
+    "outcome": "PROCEED_NEW_CLIENT"               // CONFIRMED_MATCH → case.clientMasterId set, status = CLOSED_LINKED
+  },
+  "externalResolution": {
+    "request": { "entityName": "Meridian Commodities Trading Pte. Ltd.", "country": "SG", "registrationNumber": "201812345K" },
+    "matches": [
+      { "source": "MOODYS",     "externalId": "MDY-70441823",           "score": 0.97, "matchGrade": "PERFECT" },
+      { "source": "IHS_MARKIT", "externalId": "IHS-CP-5582901",         "score": 0.95, "matchGrade": "PERFECT" },
+      { "source": "SWIFT_KYC",  "externalId": "SW-KYC-SG-3341276",      "score": 0.91, "matchGrade": "POSSIBLE" },
+      { "source": "GLEIF",      "externalId": "549300MLUDYVRQOOXS27",   "score": 0.99, "matchGrade": "PERFECT" }
+    ],
+    "humanVerification": { "decision": "ACCEPT_ALL", "verifiedBy": "u-2210", "verifiedAt": "2026-08-12T05:02:11Z" },
+    "acceptedIdentifiers": ["MOODYS:MDY-70441823","IHS_MARKIT:IHS-CP-5582901","SWIFT_KYC:SW-KYC-SG-3341276","GLEIF:549300MLUDYVRQOOXS27"]
+  }                                                // → writes Entity.Identifiers
+}</code></pre>
+
+  <h4>IN-03 · Jurisdiction &amp; product scoping — <span class="chip human">Human</span></h4>
+<pre><code>"data": {
+  "scope": {
+    "jurisdictions": [
+      { "country": "SG", "bookingEntity": "Bank (Singapore) Ltd", "role": "LEAD" },
+      { "country": "GB", "bookingEntity": "Bank (UK) Plc",        "role": "LOCAL" }
+    ],
+    "products": [
+      { "code": "CASH_MGMT",     "jurisdictions": ["SG","GB"] },
+      { "code": "FX",            "jurisdictions": ["SG","GB"], "financialMarkets": true },
+      { "code": "TRADE_FINANCE", "jurisdictions": ["SG"] }
+    ],
+    "hasFMProducts": true
+  },
+  "capturedBy": { "user": "u-4471", "role": "CLIENT_MANAGER", "at": "2026-08-12T07:20:44Z" },
+  "policyValidation": { "unsupportedCombinations": [], "result": "PASS" }
+}</code></pre>
+
+  <h4>IN-04 · External data enrichment — <span class="chip api">API</span> + <span class="chip rules">Rules</span></h4>
+<pre><code>"data": {
+  "fetches": [
+    { "source": "MOODYS",     "externalId": "MDY-70441823",  "httpStatus": 200, "attributesReturned": 46, "payloadRef": "s3://…/in04-moodys.json" },
+    { "source": "IHS_MARKIT", "externalId": "IHS-CP-5582901","httpStatus": 200, "attributesReturned": 38, "payloadRef": "s3://…/in04-ihs.json" },
+    { "source": "SWIFT_KYC",  "externalId": "SW-KYC-SG-3341276", "httpStatus": 200, "attributesReturned": 24, "payloadRef": "s3://…/in04-swiftkyc.json" },
+    { "source": "GLEIF",      "externalId": "549300MLUDYVRQOOXS27", "httpStatus": 200, "attributesReturned": 12, "payloadRef": "s3://…/in04-gleif.json" }
+  ],
+  "attributesApplied": [                            // sample — full set on Entity.Definition
+    { "attribute": "legalName",      "value": "Meridian Commodities Trading Pte. Ltd.", "source": "GLEIF" },
+    { "attribute": "legalForm",      "value": "Private Company Limited by Shares",       "source": "MOODYS" },
+    { "attribute": "industryCode",   "value": "NAICS 425120",                            "source": "IHS_MARKIT" },
+    { "attribute": "operatingStatus","value": "ACTIVE",                                  "source": "MOODYS" }
+  ],
+  "droolsValidation": {
+    "kieContainer": "clmt-validation:3.2.1",
+    "results": [
+      { "rule": "VAL-014-legal-name-registry-match", "outcome": "PASS" },
+      { "rule": "VAL-031-address-country-consistency", "outcome": "PASS" },
+      { "rule": "VAL-047-status-active-required", "outcome": "PASS" }
+    ],
+    "failures": 0
+  }
+}</code></pre>
+
+  <h4>IN-05 · Ownership information — <span class="chip api">API / STP</span> (informational)</h4>
+<pre><code>"data": {
+  "request": { "source": "MOODYS", "externalId": "MDY-70441823", "type": "OWNERSHIP_TREE", "minPct": 10 },
+  "asOf": "2026-06-30",
+  "associations": [
+    { "party": "Meridian Holdings Ltd",        "partyType": "ORGANISATION", "role": "SHAREHOLDER", "pct": 65.0, "country": "KY" },
+    { "party": "Tan Wei Liang",                "partyType": "PERSON",       "role": "SHAREHOLDER", "pct": 20.0, "country": "SG" },
+    { "party": "Arcadia Resources Pte. Ltd.",  "partyType": "ORGANISATION", "role": "SHAREHOLDER", "pct": 15.0, "country": "SG" }
+  ],
+  "unresolvedLayers": [ { "party": "Meridian Holdings Ltd", "reason": "KY holding — beneficial owners not in source" } ],
+  "informationalOnly": true,
+  "ownershipAvailableEvent": { "published": true, "at": "2026-08-12T07:24:31Z" }   // soft input for IN-07
+}</code></pre>
+
+  <h4>IN-06 · Adverse media &amp; sanctions view — <span class="chip agent">Agentic</span> (LangGraph + SerpAPI)</h4>
+<pre><code>"data": {
+  "agentRun": { "graph": "adverse-media-search", "graphVersion": "1.4.2", "model": "claude-sonnet-4-6",
+                "promptVersion": "am-p7", "runKey": "CLMT-2026-081201-T06-r1", "durationMs": 41200, "serpApiCalls": 6 },
+  "queries": [ "\"Meridian Commodities Trading\" sanctions", "\"Meridian Commodities\" Singapore investigation",
+               "\"Meridian Holdings\" Cayman adverse", "\"Tan Wei Liang\" commodities fraud OR probe" ],
+  "findings": [
+    { "category": "ADVERSE_MEDIA", "title": "Commodity traders face scrutiny over Cayman structures",
+      "url": "https://example-news.com/a/88231", "publishedAt": "2025-11-04",
+      "relevance": "MEDIUM", "matchedParty": "Meridian Holdings Ltd",
+      "note": "Sector-wide piece; Meridian Holdings named once, no allegation" }
+  ],
+  "sanctionsMentions": [], "nexusMentions": [],
+  "summaryMarkdown": "…2-paragraph cited summary rendered in the task screen…",
+  "nothingFoundVerdict": false,                   // true → summary states nothing has been found
+  "citationsCount": 1
+}</code></pre>
+
+  <h4>IN-07 · Initial name screening — <span class="chip api">API / STP</span></h4>
+<pre><code>"data": {
+  "provider": "GROUP_NAME_SCREENING",
+  "ownershipInputUsed": { "available": true, "sourceTask": "IN-05", "associationsIncluded": 3 },
+  "request": {
+    "parties": [
+      { "name": "Meridian Commodities Trading Pte. Ltd.", "type": "ORGANISATION", "country": "SG" },
+      { "name": "Meridian Holdings Ltd",  "type": "ORGANISATION", "country": "KY" },
+      { "name": "Tan Wei Liang",          "type": "PERSON",       "country": "SG" },
+      { "name": "Arcadia Resources Pte. Ltd.", "type": "ORGANISATION", "country": "SG" }
+    ]
+  },
+  "results": [
+    { "party": "Tan Wei Liang", "listType": "PEP", "matched": true, "score": 0.82,
+      "listedName": "Tan Wei Liang", "listRef": "PEP-SG-2210044", "note": "possible — former statutory board member" }
+  ],
+  "indication": { "sanctionsPossible": false, "pepPossible": true, "nexusPossible": false },
+  "screeningRef": "SCR-20260812-99120"
+}</code></pre>
+
+  <h4>IN-08 · Regulatory classification applicability — <span class="chip api">API / STP</span> (conditional)</h4>
+<pre><code>"data": {
+  "trigger": { "hasFMProducts": true, "fmProducts": ["FX"] },
+  "request": { "jurisdictions": ["SG","GB"], "products": ["FX"], "entityType": "CORPORATE" },
+  "applicableClassifications": [
+    { "regime": "MIFID_II",   "classification": "CLIENT_CATEGORISATION", "required": true, "questionnaire": "Q-MIFID-CAT-v5" },
+    { "regime": "DODD_FRANK", "classification": "US_PERSON_ECP",         "required": true, "questionnaire": "Q-DF-USP-v3" },
+    { "regime": "EMIR",       "classification": "FC_NFC",                "required": true, "questionnaire": "Q-EMIR-FCNFC-v4" }
+  ],
+  "notApplicable": [ { "regime": "HKMA_OTC", "reason": "No HK booking in scope" } ]
+}</code></pre>
+
+  <h4>IN-09 · Client risk assessment — <span class="chip api">API / STP</span></h4>
+<pre><code>"data": {
+  "request": { "snapshotRef": "s3://…/in09-cra-input.json",
+               "inputs": ["Entity.Definition","Entity.Associations","screening indication","jurisdictions","products"] },
+  "result": {
+    "rating": "C", "scale": "A_TO_E", "riskBand": "HIGH",   // A,B = LOW; C,D,E = HIGH
+    "factors": [
+      { "factor": "OWNERSHIP_COMPLEXITY", "detail": "Offshore holding (KY) with unresolved BO", "contribution": "HIGH" },
+      { "factor": "SCREENING", "detail": "Possible PEP association", "contribution": "MEDIUM" },
+      { "factor": "COUNTRY", "detail": "SG/GB operations", "contribution": "LOW" }
+    ],
+    "modelVersion": "cra-2026.2"
+  },
+  "appliedToCase": { "field": "riskRating", "value": "C" }
+}</code></pre>
+
+  <h4>IN-10 · Document checklist, dedupe &amp; gap analysis — <span class="chip api">API</span> + <span class="chip rules">Rules</span></h4>
+<pre><code>"data": {
+  "iteration": 1,
+  "checklistRequest": { "jurisdictions": ["SG","GB"], "products": ["CASH_MGMT","FX","TRADE_FINANCE"],
+                        "riskRating": "C", "entityType": "CORPORATE",
+                        "availableAttributes": ["legalName","legalForm","registeredAddress","industryCode","operatingStatus","lei","ownership>=10pct"] },
+  "requiredItems": [
+    { "code": "ATTR-LEGAL-NAME",   "type": "ATTRIBUTE", "satisfiedBy": "EXTERNAL_DATA", "source": "GLEIF",  "status": "SATISFIED" },
+    { "code": "ATTR-REG-ADDRESS",  "type": "ATTRIBUTE", "satisfiedBy": "EXTERNAL_DATA", "source": "MOODYS", "status": "SATISFIED" },
+    { "code": "DOC-COI",           "type": "DOCUMENT",  "description": "Certificate of Incumbency (≤6 months)", "status": "GAP" },
+    { "code": "DOC-BO-DECL",       "type": "DOCUMENT",  "description": "Beneficial ownership declaration — Meridian Holdings Ltd (KY)", "status": "GAP" },
+    { "code": "Q-MIFID-CAT-v5",    "type": "QUESTIONNAIRE", "regime": "MIFID_II", "status": "GAP" },
+    { "code": "Q-DF-USP-v3",       "type": "QUESTIONNAIRE", "regime": "DODD_FRANK", "status": "GAP" },
+    { "code": "Q-EMIR-FCNFC-v4",   "type": "QUESTIONNAIRE", "regime": "EMIR", "status": "GAP" },
+    { "code": "ATTR-NATURE-OF-BUSINESS", "type": "ATTRIBUTE", "satisfiedBy": "CLIENT_CONFIRMATION", "status": "GAP" }
+  ],
+  "droolsGapRun": { "kieContainer": "clmt-checklist:4.0.3",
+                    "dedupe": { "duplicatesRemoved": 2, "note": "DOC-CONSTITUTION requested by SG and GB rulesets — merged to one" },
+                    "firedRules": ["GAP-002-external-data-suffices","DED-011-cross-jurisdiction-merge"] },
+  "gapSummary": { "satisfied": 9, "gaps": 6, "decision": "OUTREACH_REQUIRED" }   // gaps = 0 → STAGE_COMPLETE
+}</code></pre>
+
+  <h4>IN-11 · Outreach draft + human verification — <span class="chip agent">Agentic</span> + <span class="chip human">Human</span></h4>
+<pre><code>"data": {
+  "agentRun": { "graph": "outreach-drafting", "graphVersion": "2.1.0", "model": "claude-sonnet-4-6", "promptVersion": "or-p4" },
+  "draft": {
+    "language": "en",
+    "heldForVerification": ["legalName","registeredAddress","industryCode","ownership structure (3 parties)"],
+    "requestedItems": ["DOC-COI","DOC-BO-DECL","Q-MIFID-CAT-v5","Q-DF-USP-v3","Q-EMIR-FCNFC-v4","ATTR-NATURE-OF-BUSINESS"],
+    "contentRef": "s3://…/in11-outreach-draft-r1.html", "contentSha256": "c7d1…88f0"
+  },
+  "humanVerification": {
+    "status": "APPROVED",
+    "edits": [ { "section": "DOC-BO-DECL", "change": "Added plain-language note on why KY holding requires BO declaration" } ],
+    "approvedContentSha256": "e91a…2b77",
+    "verifiedBy": "u-2210", "role": "ONBOARDING_OFFICER", "verifiedAt": "2026-08-13T02:11:39Z"
+  }
+}</code></pre>
+
+  <h4>IN-12 · Outreach dispatch — <span class="chip api">API / STP</span></h4>
+<pre><code>"data": {
+  "mode": "CHANNEL",                               // CHANNEL | EMAIL
+  "channelDispatch": { "endpoint": "channel:/client-comms/v2/requests", "channelRequestId": "CHN-7741290",
+                       "dispatchedAt": "2026-08-13T02:15:04Z", "deliveryReceipt": "DELIVERED" },
+  "emailDispatch": null,                           // { "from": "onboarding.sg@bank.com", "graphMessageId": "...", ... }
+  "contentSha256": "e91a…2b77",                    // MUST equal humanVerification.approvedContentSha256
+  "chasers": { "cadence": "P3D", "max": 3, "sent": 0, "nextAt": "2026-08-16T02:15:04Z" }
+}</code></pre>
+
+  <h4>IN-13 · Client response monitoring — <span class="chip api">API / STP</span></h4>
+<pre><code>"data": {
+  "armedAt": "2026-08-13T02:15:05Z",
+  "receipts": [
+    { "receivedVia": "CHANNEL_API", "receivedAt": "2026-08-19T06:42:10Z",
+      "items": [ { "requirementCode": "DOC-COI", "documentRef": "EDOC-3312", "sha256": "9f2b…c41a" },
+                 { "requirementCode": "ATTR-NATURE-OF-BUSINESS", "type": "DATA_CONFIRMATION", "value": "Physical commodity trading — energy and metals" } ],
+      "zeebeMessage": { "name": "client-submission", "correlationKey": "CLMT-2026-081201", "messageKey": "6755399441100231" } },
+    { "receivedVia": "MAILBOX_POLL", "receivedAt": "2026-08-20T09:03:52Z",
+      "mail": { "from": "cfo@meridiancommodities.sg", "subject": "RE: Onboarding CLMT-2026-081201", "graphMessageId": "AAMkAD…" },
+      "items": [ { "requirementCode": "UNMATCHED", "documentRef": "EDOC-3319", "fileName": "BO_declaration_signed.pdf" } ] }
+  ],
+  "unmatchedItems": [ { "documentRef": "EDOC-3319", "routedTo": "OPS_TRIAGE", "resolvedAs": "DOC-BO-DECL" } ]
+}</code></pre>
+
+  <h4>IN-14 · Extract &amp; enrich from client documents — <span class="chip agent">Agentic</span></h4>
+<pre><code>"data": {
+  "agentRun": { "graph": "doc-extraction", "graphVersion": "3.0.1", "model": "claude-sonnet-4-6", "promptVersion": "dx-p9" },
+  "documents": [
+    { "documentRef": "EDOC-3312", "fileName": "certificate_of_incumbency.pdf",
+      "classification": { "docType": "CERT_OF_INCUMBENCY", "confidence": 0.98, "satisfies": "DOC-COI" },
+      "fields": [
+        { "name": "directors[0].name", "value": "Tan Wei Liang", "confidence": 0.99, "page": 1 },
+        { "name": "issueDate", "value": "2026-07-30", "confidence": 0.97, "page": 1 } ],
+      "defects": [] },
+    { "documentRef": "EDOC-3319", "fileName": "BO_declaration_signed.pdf",
+      "classification": { "docType": "BO_DECLARATION", "confidence": 0.94, "satisfies": "DOC-BO-DECL" },
+      "fields": [ { "name": "ultimateOwners[0].name", "value": "Tan Family Trust", "confidence": 0.71, "page": 2 } ],
+      "defects": [] }
+  ],
+  "humanFieldVerifications": [ { "field": "ultimateOwners[0].name", "documentRef": "EDOC-3319",
+                                 "verifiedValue": "Tan Family Trust (Cayman)", "verifiedBy": "u-2210" } ],
+  "enrichmentApplied": [
+    { "target": "Entity.Associations", "change": "ADD ultimate owner via Meridian Holdings Ltd", "evidence": "EDOC-3319" },
+    { "target": "Entity.Documents",    "change": "ADD EDOC-3312, EDOC-3319 with classifications" } ],
+  "loop": { "backTo": "IN-10", "nextIteration": 2 }
+}</code></pre>
+</section>
+<!-- ============================ 6. DOMAIN DATA MODEL ============================ -->
+<section id="domain">
+  <div class="secnum">SECTION 06</div>
+  <h2>Domain Data Model — Entity.* Objects &amp; PostgreSQL Implementation</h2>
+  <p>The domain model is the bank-facing view of the client, populated by tasks as they complete. Case-task JSONB is the working record; the <span class="mono">clmt_domain</span> tables are the curated result. Every domain write carries the producing <span class="mono">taskId</span> as lineage.</p>
+
+  <h4>Entity.Definition — main entity object (seeded IN-01, enriched IN-04/IN-14)</h4>
+<pre><code>{
+  "entityRef": "ENT-000871",
+  "legalName": "Meridian Commodities Trading Pte. Ltd.",
+  "legalForm": "Private Company Limited by Shares",
+  "incorporationCountry": "SG",
+  "incorporationNumber": "201812345K",
+  "incorporationDate": "2018-05-14",
+  "operatingStatus": "ACTIVE",
+  "industry": { "scheme": "NAICS", "code": "425120", "description": "Wholesale trade agents and brokers" },
+  "natureOfBusiness": "Physical commodity trading — energy and metals",   // client-confirmed via IN-13/14
+  "addresses": [
+    { "type": "REGISTERED", "line1": "8 Marina Boulevard #12-01", "city": "Singapore", "postalCode": "018981", "country": "SG",
+      "source": "MOODYS", "sourceTask": "CLMT-2026-081201-T04" }
+  ],
+  "riskRating": { "value": "C", "scale": "A_TO_E", "band": "HIGH", "assessedBy": "cra-2026.2", "sourceTask": "…-T09" },
+  "lineage": { "createdBy": "…-T01", "lastEnrichedBy": "…-T14" }
+}</code></pre>
+
+  <h4>Entity.Identifiers — internal ↔ external ID map (populated IN-02, human-verified)</h4>
+<pre><code>{
+  "entityRef": "ENT-000871",
+  "identifiers": [
+    { "scheme": "CLIENT_MASTER", "value": null,                    "status": "NOT_LINKED" },
+    { "scheme": "UEN_SG",        "value": "201812345K",            "status": "VERIFIED", "sourceTask": "…-T01" },
+    { "scheme": "LEI",           "value": "549300MLUDYVRQOOXS27",  "status": "VERIFIED", "source": "GLEIF",      "verifiedBy": "u-2210", "sourceTask": "…-T02" },
+    { "scheme": "MOODYS_ID",     "value": "MDY-70441823",          "status": "VERIFIED", "source": "MOODYS",     "verifiedBy": "u-2210", "sourceTask": "…-T02" },
+    { "scheme": "IHS_MARKIT_ID", "value": "IHS-CP-5582901",        "status": "VERIFIED", "source": "IHS_MARKIT", "verifiedBy": "u-2210", "sourceTask": "…-T02" },
+    { "scheme": "SWIFT_KYC_ID",  "value": "SW-KYC-SG-3341276",     "status": "VERIFIED", "source": "SWIFT_KYC",  "verifiedBy": "u-2210", "sourceTask": "…-T02" }
+  ]
+}</code></pre>
+
+  <h4>Entity.Associations — ownership &amp; related parties (populated IN-05, enriched IN-14)</h4>
+<pre><code>{
+  "entityRef": "ENT-000871",
+  "asOf": "2026-06-30",
+  "associations": [
+    { "assocId": "ASC-0001", "party": { "name": "Meridian Holdings Ltd", "type": "ORGANISATION", "country": "KY" },
+      "role": "SHAREHOLDER", "pct": 65.0, "direct": true,  "source": "MOODYS", "sourceTask": "…-T05" },
+    { "assocId": "ASC-0002", "party": { "name": "Tan Wei Liang", "type": "PERSON", "country": "SG" },
+      "role": "SHAREHOLDER", "pct": 20.0, "direct": true,  "source": "MOODYS", "sourceTask": "…-T05",
+      "screening": { "pepPossible": true, "screeningRef": "SCR-20260812-99120" } },
+    { "assocId": "ASC-0003", "party": { "name": "Arcadia Resources Pte. Ltd.", "type": "ORGANISATION", "country": "SG" },
+      "role": "SHAREHOLDER", "pct": 15.0, "direct": true,  "source": "MOODYS", "sourceTask": "…-T05" },
+    { "assocId": "ASC-0004", "party": { "name": "Tan Family Trust (Cayman)", "type": "TRUST", "country": "KY" },
+      "role": "ULTIMATE_OWNER", "via": "ASC-0001", "direct": false,
+      "source": "CLIENT_DOCUMENT", "evidence": "EDOC-3319", "sourceTask": "…-T14" }
+  ]
+}</code></pre>
+
+  <h4>Entity.Documents — all gathered documents (populated IN-04 payload refs, IN-13/IN-14 client docs)</h4>
+<pre><code>{
+  "entityRef": "ENT-000871",
+  "documents": [
+    { "documentRef": "EDOC-3301", "origin": "EXTERNAL_SOURCE", "source": "MOODYS",
+      "docType": "SOURCE_PROFILE_SNAPSHOT", "storageRef": "s3://clmt-sg-evidence/…/in04-moodys.json",
+      "sha256": "44ab…10ce", "receivedAt": "2026-08-12T07:22:03Z", "sourceTask": "…-T04" },
+    { "documentRef": "EDOC-3312", "origin": "CLIENT", "channel": "CLIENT_PORTAL",
+      "docType": "CERT_OF_INCUMBENCY", "satisfies": "DOC-COI",
+      "storageRef": "s3://clmt-sg-evidence/…/9f2b…c41a.pdf", "sha256": "9f2b…c41a",
+      "receivedAt": "2026-08-19T06:42:10Z", "classificationConfidence": 0.98, "sourceTask": "…-T14" },
+    { "documentRef": "EDOC-3319", "origin": "CLIENT", "channel": "EMAIL",
+      "docType": "BO_DECLARATION", "satisfies": "DOC-BO-DECL",
+      "storageRef": "s3://clmt-sg-evidence/…/77aa…90d2.pdf", "sha256": "77aa…90d2",
+      "receivedAt": "2026-08-20T09:03:52Z", "classificationConfidence": 0.94, "sourceTask": "…-T14" }
+  ]
+}</code></pre>
+
+  <h3>6.1 &nbsp;Task → domain population map</h3>
+  <table>
+    <tr><th style="width:80px">Task</th><th style="width:200px">Entity.Definition</th><th style="width:200px">Entity.Identifiers</th><th style="width:200px">Entity.Associations</th><th>Entity.Documents</th></tr>
+    <tr><td><span class="stepid">IN-01</span></td><td>seed: name, country, incorp no., addresses</td><td>UEN / registration number</td><td>—</td><td>—</td></tr>
+    <tr><td><span class="stepid">IN-02</span></td><td>—</td><td>client-master link (if matched); Moody's, IHS Markit, SWIFT KYC, GLEIF IDs (human-verified)</td><td>—</td><td>—</td></tr>
+    <tr><td><span class="stepid">IN-04</span></td><td>legal form, status, industry, addresses (source-attributed)</td><td>—</td><td>—</td><td>source profile snapshots</td></tr>
+    <tr><td><span class="stepid">IN-05</span></td><td>—</td><td>—</td><td>direct owners ≥10%, unresolved layers</td><td>—</td></tr>
+    <tr><td><span class="stepid">IN-07</span></td><td>—</td><td>—</td><td>screening flags on associated parties</td><td>—</td></tr>
+    <tr><td><span class="stepid">IN-09</span></td><td>risk rating A–E + band</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td><span class="stepid">IN-13/14</span></td><td>client-confirmed attributes</td><td>—</td><td>ultimate owners from client declarations</td><td>client documents + classifications + hashes</td></tr>
+  </table>
+
+  <h3>6.2 &nbsp;PostgreSQL implementation (DDL extract)</h3>
+<pre><code>-- ============ clmt_case ============
+CREATE TABLE clmt_case.onboarding_case (
+  case_id            text PRIMARY KEY,
+  case_type          text NOT NULL,
+  stage              text NOT NULL,
+  status             text NOT NULL,
+  entity_ref         text NOT NULL REFERENCES clmt_domain.entity_definition(entity_ref),
+  client_master_id   text,
+  source             jsonb NOT NULL,              -- {system, opportunityId, relationshipManager}
+  risk_rating        char(1) CHECK (risk_rating IN ('A','B','C','D','E')),
+  loop_count         int  NOT NULL DEFAULT 0,
+  process_instance_key bigint,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX ux_case_crm_opp ON clmt_case.onboarding_case ((source->>'opportunityId'));
+
+CREATE TABLE clmt_case.case_task (
+  task_id      text PRIMARY KEY,
+  case_id      text NOT NULL REFERENCES clmt_case.onboarding_case(case_id),
+  task_code    text NOT NULL,                     -- IN-01 … IN-14
+  task_type    text NOT NULL,                     -- API | RULES | AGENTIC | HUMAN | HYBRID
+  status       text NOT NULL,
+  payload      jsonb NOT NULL,                    -- §5 object ("data" + envelope fields)
+  started_at   timestamptz, completed_at timestamptz,
+  UNIQUE (case_id, task_code, (payload->'data'->>'iteration'))
+);
+CREATE INDEX ix_task_case   ON clmt_case.case_task (case_id, task_code);
+CREATE INDEX ix_task_payload ON clmt_case.case_task USING gin (payload jsonb_path_ops);
+
+CREATE TABLE clmt_case.outreach_request (
+  outreach_id  text PRIMARY KEY,
+  case_id      text NOT NULL REFERENCES clmt_case.onboarding_case(case_id),
+  iteration    int  NOT NULL,
+  mode         text NOT NULL CHECK (mode IN ('CHANNEL','EMAIL')),
+  content_sha256 text NOT NULL,                   -- equals approved hash from IN-11
+  approved_by  text NOT NULL, approved_at timestamptz NOT NULL,
+  dispatched_at timestamptz, delivery_status text
+);
+
+CREATE TABLE clmt_case.client_submission (
+  submission_id text PRIMARY KEY,
+  case_id       text NOT NULL REFERENCES clmt_case.onboarding_case(case_id),
+  received_via  text NOT NULL CHECK (received_via IN ('CHANNEL_API','MAILBOX_POLL')),
+  received_at   timestamptz NOT NULL,
+  items         jsonb NOT NULL                    -- [{requirementCode, documentRef|value, sha256}]
+);
+
+-- ============ clmt_domain ============
+CREATE TABLE clmt_domain.entity_definition (
+  entity_ref     text PRIMARY KEY,
+  legal_name     text NOT NULL,
+  legal_form     text,
+  incorporation_country char(2) NOT NULL,
+  incorporation_number  text NOT NULL,
+  incorporation_date    date,
+  operating_status      text,
+  industry       jsonb,                           -- {scheme, code, description}
+  nature_of_business text,
+  addresses      jsonb NOT NULL DEFAULT '[]',     -- source-attributed array
+  risk_rating    jsonb,                           -- {value, scale, band, assessedBy, sourceTask}
+  lineage        jsonb NOT NULL,
+  UNIQUE (incorporation_country, incorporation_number)
+);
+
+CREATE TABLE clmt_domain.entity_identifier (
+  entity_ref  text NOT NULL REFERENCES clmt_domain.entity_definition(entity_ref),
+  scheme      text NOT NULL,                      -- CLIENT_MASTER | LEI | MOODYS_ID | IHS_MARKIT_ID | SWIFT_KYC_ID | UEN_SG …
+  id_value    text,
+  status      text NOT NULL,                      -- VERIFIED | PENDING | NOT_LINKED
+  source      text, verified_by text, source_task text,
+  PRIMARY KEY (entity_ref, scheme)
+);
+
+CREATE TABLE clmt_domain.entity_association (
+  assoc_id    text PRIMARY KEY,
+  entity_ref  text NOT NULL REFERENCES clmt_domain.entity_definition(entity_ref),
+  party       jsonb NOT NULL,                     -- {name, type, country}
+  role        text NOT NULL,                      -- SHAREHOLDER | ULTIMATE_OWNER | DIRECTOR …
+  pct         numeric(5,2),
+  direct      boolean NOT NULL DEFAULT true,
+  via_assoc   text REFERENCES clmt_domain.entity_association(assoc_id),
+  source      text NOT NULL, evidence_doc text, source_task text NOT NULL,
+  screening   jsonb                                -- {pepPossible, sanctionsPossible, screeningRef}
+);
+
+CREATE TABLE clmt_domain.entity_document (
+  document_ref text PRIMARY KEY,
+  entity_ref   text NOT NULL REFERENCES clmt_domain.entity_definition(entity_ref),
+  origin       text NOT NULL CHECK (origin IN ('EXTERNAL_SOURCE','CLIENT','BANK')),
+  channel      text,
+  doc_type     text NOT NULL,
+  satisfies    text,                              -- requirement code from IN-10
+  storage_ref  text NOT NULL,                     -- S3 URI (WORM bucket)
+  sha256       text NOT NULL,
+  received_at  timestamptz NOT NULL,
+  classification_confidence numeric(4,3),
+  source_task  text NOT NULL
+);
+CREATE INDEX ix_doc_entity ON clmt_domain.entity_document (entity_ref, doc_type);</code></pre>
+
+  <div class="callout"><p><strong>Modelling stance:</strong> the §5 task objects live as JSONB — they are working records whose shape evolves with the process, and GIN indexing covers workbench queries. The Entity.* domain data is <em>relational-first</em> (typed columns, FKs, uniqueness on scheme/ID pairs) because it outlives the case, feeds downstream stages, and is what the bank's client data model consumes. The <span class="mono">source_task</span> column on every domain row is the lineage thread back to the exact task object — and its audit block — that produced the value.</p></div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer><div class="wrap">
+  CLMT — CLIENT LIFECYCLE MANAGEMENT PLATFORM &middot; INTAKE STAGE TECHNICAL DESIGN &middot; DRAFT FOR ARCHITECTURE REVIEW<br>
+  Companion documents: Intake functional design v2.1 &middot; Orchestration + Tax design
+</div></footer>
+
+</body>
+</html>
