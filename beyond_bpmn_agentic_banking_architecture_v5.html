@@ -1,0 +1,3537 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>
+      Beyond BPMN — Deterministic &amp; Probabilistic Agentic Orchestration for
+      Banking
+    </title>
+    <style>
+      :root {
+        --ink: #172033;
+        --muted: #5e687b;
+        --line: #d9dee8;
+        --paper: #ffffff;
+        --bg: #f4f6f9;
+        --nav: #0f172a;
+        --blue: #1d4ed8;
+        --cyan: #0e7490;
+        --green: #15803d;
+        --amber: #b45309;
+        --red: #b91c1c;
+        --purple: #6d28d9;
+        --softblue: #eff6ff;
+        --softgreen: #f0fdf4;
+        --softamber: #fffbeb;
+        --softred: #fef2f2;
+        --softpurple: #f5f3ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter,
+          Segoe UI,
+          Arial,
+          sans-serif;
+        line-height: 1.55;
+      }
+      a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .shell {
+        display: grid;
+        grid-template-columns: 285px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: auto;
+        background: var(--nav);
+        color: #d8deea;
+        padding: 28px 22px;
+      }
+      .brand {
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #93c5fd;
+        margin-bottom: 14px;
+        font-weight: 700;
+      }
+      nav h1 {
+        font-size: 20px;
+        line-height: 1.25;
+        color: white;
+        margin: 0 0 20px;
+      }
+      nav .meta {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 24px;
+      }
+      nav a {
+        display: block;
+        color: #cbd5e1;
+        padding: 7px 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin: 2px 0;
+      }
+      nav a:hover {
+        background: #1e293b;
+        color: white;
+        text-decoration: none;
+      }
+      nav .divider {
+        height: 1px;
+        background: #334155;
+        margin: 16px 0;
+      }
+      main {
+        max-width: 1180px;
+        width: 100%;
+        padding: 34px 46px 80px;
+      }
+      .paper {
+        background: var(--paper);
+        border: 1px solid #e3e7ef;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+      }
+      .cover {
+        padding: 66px 68px 56px;
+        background: linear-gradient(
+          140deg,
+          #0f172a 0%,
+          #172554 54%,
+          #0e7490 100%
+        );
+        color: white;
+      }
+      .kicker {
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #bfdbfe;
+        font-weight: 700;
+      }
+      .cover h1 {
+        font-size: 48px;
+        line-height: 1.06;
+        margin: 18px 0 22px;
+        max-width: 900px;
+      }
+      .cover .subtitle {
+        font-size: 21px;
+        color: #dbeafe;
+        max-width: 900px;
+      }
+      .cover .thesis {
+        margin-top: 36px;
+        border-left: 4px solid #67e8f9;
+        background: rgba(255, 255, 255, 0.07);
+        padding: 18px 22px;
+        max-width: 940px;
+        font-size: 17px;
+      }
+      .cover .meta2 {
+        display: flex;
+        gap: 22px;
+        flex-wrap: wrap;
+        margin-top: 32px;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+      section {
+        padding: 46px 62px;
+        border-top: 1px solid #e5e7eb;
+      }
+      section h2 {
+        font-size: 30px;
+        margin: 0 0 18px;
+        color: #0f172a;
+      }
+      section h3 {
+        font-size: 21px;
+        margin: 30px 0 10px;
+        color: #172554;
+      }
+      section h4 {
+        font-size: 16px;
+        margin: 24px 0 8px;
+      }
+      p {
+        margin: 10px 0 14px;
+      }
+      .lead {
+        font-size: 18px;
+        color: #334155;
+      }
+      .callout {
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin: 18px 0;
+        border-left: 4px solid var(--blue);
+        background: var(--softblue);
+      }
+      .callout.green {
+        border-color: var(--green);
+        background: var(--softgreen);
+      }
+      .callout.amber {
+        border-color: var(--amber);
+        background: var(--softamber);
+      }
+      .callout.red {
+        border-color: var(--red);
+        background: var(--softred);
+      }
+      .callout.purple {
+        border-color: var(--purple);
+        background: var(--softpurple);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin: 20px 0;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 18px;
+        background: #fff;
+      }
+      .card h4 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .card p {
+        font-size: 14px;
+        color: #475569;
+        margin: 6px 0;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #334155;
+        margin-right: 6px;
+      }
+      .tag.det {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .tag.prob {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+      .tag.ctrl {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .tag.risk {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 18px 0;
+        font-size: 14px;
+      }
+      th {
+        background: #f8fafc;
+        text-align: left;
+        color: #334155;
+        font-weight: 700;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 11px;
+        vertical-align: top;
+      }
+      td strong {
+        color: #0f172a;
+      }
+      ul,
+      ol {
+        padding-left: 22px;
+      }
+      li {
+        margin: 6px 0;
+      }
+      .diagram {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fbfdff;
+        padding: 18px;
+        margin: 22px 0;
+        overflow: auto;
+      }
+      .diagram-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 12px;
+      }
+      svg text {
+        font-family:
+          Inter,
+          Segoe UI,
+          Arial,
+          sans-serif;
+      }
+      pre {
+        margin: 18px 0;
+        background: #0b1220;
+        color: #dbeafe;
+        border-radius: 9px;
+        padding: 18px;
+        overflow: auto;
+        font-size: 12.5px;
+        line-height: 1.52;
+        border: 1px solid #1e293b;
+      }
+      code {
+        font-family:
+          SFMono-Regular,
+          Consolas,
+          Liberation Mono,
+          monospace;
+      }
+      .inline {
+        background: #eef2f7;
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 0.93em;
+      }
+      .mini {
+        font-size: 12px;
+        color: #64748b;
+      }
+      .table-example {
+        display: block;
+        margin-top: 7px;
+        padding-top: 7px;
+        border-top: 1px dashed #d7dde7;
+        font-size: 12px;
+        line-height: 1.42;
+        color: #64748b;
+      }
+      .code-explainer {
+        margin: -7px 0 20px;
+        border: 1px solid #dbe3ef;
+        border-left: 4px solid var(--cyan);
+        border-radius: 0 8px 8px 0;
+        background: #f8fbfd;
+        padding: 11px 15px 10px;
+      }
+      .code-explainer .label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #0e7490;
+        margin-bottom: 4px;
+      }
+      .code-explainer ul {
+        margin: 4px 0 0;
+        padding-left: 20px;
+      }
+      .code-explainer li {
+        margin: 3px 0;
+        font-size: 12.5px;
+        line-height: 1.42;
+        color: #475569;
+      }
+      .quote {
+        font-size: 20px;
+        line-height: 1.45;
+        color: #1e293b;
+        border-left: 4px solid #94a3b8;
+        padding: 10px 0 10px 18px;
+        margin: 24px 0;
+      }
+      .score {
+        font-size: 32px;
+        font-weight: 800;
+      }
+      .avoid {
+        color: #991b1b;
+      }
+      .prefer {
+        color: #166534;
+      }
+      .footer {
+        font-size: 12px;
+        color: #64748b;
+        background: #f8fafc;
+        padding: 28px 62px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .ref li {
+        margin: 8px 0;
+        font-size: 13px;
+        color: #475569;
+      }
+      .print-btn {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        background: #0f172a;
+        color: white;
+        border: 0;
+        border-radius: 999px;
+        padding: 11px 16px;
+        font-weight: 700;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+        cursor: pointer;
+      }
+      .arch-rule {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin: 10px 0;
+      }
+      .arch-rule .n {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+        border-radius: 50%;
+        background: #172554;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 12px;
+      }
+      .arch-rule div:last-child {
+        font-size: 14px;
+      }
+      @media (max-width: 920px) {
+        .shell {
+          display: block;
+        }
+        nav {
+          position: relative;
+          height: auto;
+        }
+        main {
+          padding: 14px;
+        }
+        .cover,
+        section {
+          padding: 34px 26px;
+        }
+        .cover h1 {
+          font-size: 36px;
+        }
+        .grid2,
+        .grid3 {
+          grid-template-columns: 1fr;
+        }
+        .print-btn {
+          display: none;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+        }
+        .shell {
+          display: block;
+        }
+        nav,
+        .print-btn {
+          display: none;
+        }
+        main {
+          max-width: none;
+          padding: 0;
+        }
+        .paper {
+          border: 0;
+          box-shadow: none;
+          border-radius: 0;
+        }
+        .cover {
+          min-height: 90vh;
+          page-break-after: always;
+        }
+        .diagram,
+        pre,
+        table,
+        .card {
+          break-inside: avoid;
+        }
+        section {
+          padding: 34px 44px;
+        }
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <nav>
+        <div class="brand">Architecture Position Paper</div>
+        <h1>Beyond BPMN</h1>
+        <div class="meta">
+          Deterministic &amp; probabilistic agentic orchestration for Enterprise
+          <br />Version 1.5 · 10 Aug 2026
+        </div>
+        <a href="#exec">1. Executive position</a>
+        <a href="#bpmn">2. Why move beyond BPMN</a>
+        <a href="#definitions">3. What “agent” means here</a>
+        <a href="#principles">4. Architecture principles</a>
+        <a href="#refarch">5. Reference architecture</a>
+        <a href="#det">6. Deterministic agents</a>
+        <a href="#prob">7. Probabilistic agents</a>
+        <a href="#example">8. Banking worked example</a>
+        <a href="#code">9. LangGraph implementation</a>
+        <a href="#control">10. Bank-grade controls</a>
+        <a href="#obs">11. Observability &amp; audit</a>
+        <a href="#testing">12. Testing &amp; assurance</a>
+        <a href="#platform">13. Engineering platform</a>
+        <a href="#migration">14. Migration from BPMN</a>
+        <a href="#decision">15. Architecture decision</a>
+        <a href="#appendix">Appendices</a>
+        <div class="divider"></div>
+      </nav>
+      <main>
+        <div class="paper">
+          <header class="cover">
+            <div class="kicker">
+              Technical architecture paper · Corporate &amp; Institutional
+              Banking
+            </div>
+            <h1>
+              Beyond BPMN: Deterministic and Probabilistic Agentic Orchestration
+            </h1>
+            <div class="subtitle">
+              How to replace workflow-centric execution with stateful,
+              policy-bound agents without sacrificing determinism, auditability,
+              resilience or regulatory control.
+            </div>
+            <div class="thesis">
+              <strong>Thesis.</strong> The future bank should not encode
+              business processes primarily as BPMN diagrams executed by workflow
+              engines. It should encode
+              <em>goals, state, obligations, policies and capabilities</em> in
+              an agentic runtime. Deterministic requirements remain
+              deterministic code and policy. Probabilistic models are used only
+              where the problem itself is probabilistic.
+            </div>
+          </header>
+          <section id="exec">
+            <h2>1. Executive position</h2>
+            <p class="lead">
+              The bank can adopt agents as the primary orchestration abstraction
+              <strong
+                >without turning regulated processes into LLM-driven
+                improvisation</strong
+              >. The key is to separate the system into a deterministic control
+              plane and a probabilistic intelligence plane.
+            </p>
+            <div class="grid2">
+              <div class="card">
+                <span class="tag det">Deterministic</span>
+                <h4>Control plane</h4>
+                <p>
+                  State transitions, eligibility, mandatory sequencing,
+                  segregation of duties, limits, jurisdiction rules, timeouts,
+                  retries, approvals, entitlements, policy versioning,
+                  transactional writes and evidence retention.
+                </p>
+              </div>
+              <div class="card">
+                <span class="tag prob">Probabilistic</span>
+                <h4>Intelligence plane</h4>
+                <p>
+                  Document interpretation, entity matching, adverse-media
+                  assessment, classification, narrative generation, exception
+                  analysis, summarisation and tool selection where multiple
+                  valid actions may exist.
+                </p>
+              </div>
+            </div>
+            <div class="callout green">
+              <strong>The decisive design choice:</strong> deterministic
+              requirements must never become deterministic merely because the
+              prompt says “always”. If a requirement is a control, it belongs in
+              code, policy-as-code, schemas, authorization, transaction
+              boundaries or graph topology — not in an LLM instruction.
+            </div>
+            <p>
+              This leads to a different definition of an enterprise agent. An
+              agent is not necessarily “an LLM with tools.” It is a bounded,
+              stateful execution unit with a goal, an allowed action set, a
+              contract, a policy envelope and an auditable lifecycle. Some
+              agents contain no language model at all. These
+              <strong>deterministic agents</strong> replace many BPMN service
+              tasks, gateways, timers and sub-processes with ordinary software
+              functions and explicit graph transitions. Other agents invoke
+              frontier models, but only behind typed interfaces and
+              deterministic gates.
+            </p>
+            <h3>What changes strategically</h3>
+            <table>
+              <tr>
+                <th>Workflow-centric bank</th>
+                <th>Agentic bank</th>
+              </tr>
+              <tr>
+                <td>
+                  Process model is the centre of gravity.<span
+                    class="table-example"
+                    ><strong>example: </strong>adding Singapore derivatives
+                    onboarding typically means adding a BPMN path through tax,
+                    KYC and MAS classification.</span
+                  >
+                </td>
+                <td>
+                  <strong>Case state + policy + capabilities</strong> are the
+                  centre of gravity.<span class="table-example"
+                    ><strong>example: </strong>SG + derivatives facts cause
+                    policy to create TAX, KYC and MAS obligations; specialist
+                    agents act on whichever obligations remain open.</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Large process diagrams encode path combinations.<span
+                    class="table-example"
+                    ><strong>example: </strong>a client using three booking
+                    locations can create many gateway combinations for country,
+                    product and KYC variants.</span
+                  >
+                </td>
+                <td>
+                  Small specialist agents react to current state and
+                  obligations.<span class="table-example"
+                    ><strong>example: </strong>tax, KYC and regulatory agents
+                    independently evaluate the same case state and resolve only
+                    the obligations they own.</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Change often means editing orchestration plus downstream
+                  logic.<span class="table-example"
+                    ><strong>example: </strong>a new MAS classification rule may
+                    require changes to the process model, routing conditions and
+                    downstream task configuration.</span
+                  >
+                </td>
+                <td>
+                  Policy, state schema and capability implementations evolve
+                  independently.<span class="table-example"
+                    ><strong>example: </strong>publish a new MAS policy version;
+                    the graph and specialist agents consume the changed
+                    obligation without redesigning the end-to-end flow.</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Exception path is another modeled branch.<span
+                    class="table-example"
+                    ><strong>example: </strong>missing UBO evidence is modeled
+                    as a separate exception branch, manual task and rework
+                    loop.</span
+                  >
+                </td>
+                <td>
+                  Exception becomes state, evidence and a resolution
+                  obligation.<span class="table-example"
+                    ><strong>example: </strong>MISSING_UBO_EVIDENCE becomes a
+                    blocking exception with evidence and a resolution obligation
+                    until a client or reviewer resolves it.</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Human task is a workflow primitive.<span class="table-example"
+                    ><strong>example: </strong>low-confidence ownership data is
+                    routed to a generic manual-review activity in the
+                    workflow.</span
+                  >
+                </td>
+                <td>
+                  Human judgment is a typed interrupt with reason, entitlement
+                  and audit evidence.<span class="table-example"
+                    ><strong>example: </strong>the graph raises a durable
+                    interrupt containing the exact ownership evidence, reason
+                    code and required KYC approver entitlement.</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  AI is bolted onto workflow tasks.<span class="table-example"
+                    ><strong>example: </strong>an LLM document summarizer is
+                    inserted inside an existing document-review task while the
+                    BPMN process still owns the decision.</span
+                  >
+                </td>
+                <td>
+                  AI is one execution technique within a governed agent
+                  runtime.<span class="table-example"
+                    ><strong>example: </strong>an extraction agent returns typed
+                    facts with provenance; deterministic KYC policy validates
+                    them before any onboarding decision is taken.</span
+                  >
+                </td>
+              </tr>
+            </table>
+            <div class="quote">
+              “Agentic” should describe the execution architecture, not the
+              degree of randomness.
+            </div>
+          </section>
+          <section id="bpmn">
+            <h2>2. Why move beyond BPMN</h2>
+            <p>
+              BPMN solved an important problem: a standardized notation bridging
+              business process design and implementation. The Object Management
+              Group (OMG) continues to publish BPMN 2.0.2 as the formal
+              specification. That notation remains useful for communicating
+              high-level process intent. The architecture argument in this paper
+              is narrower:
+              <strong
+                >BPMN should stop being the strategic runtime programming model
+                for complex, adaptive banking processes.</strong
+              >
+            </p>
+            <h3>2.1 The scaling problem is combinatorive</h3>
+            <p>
+              Consider corporate onboarding. Routing depends on legal-entity
+              type, domicile, booking jurisdictions, product set, customer
+              segment, ownership complexity, tax status, regulatory
+              classification, sanctions/PEP findings, documentary evidence, risk
+              tier, outsourcing restrictions and data residency. BPMN represents
+              combinations primarily as explicit branches, gateways and
+              sub-processes. As dimensions multiply, the process model becomes a
+              map of combinations rather than a model of business intent.
+            </p>
+            <p>
+              An agentic design instead carries facts in state and calculates
+              <em>current obligations</em>. A new requirement typically adds a
+              policy rule or a capability, not another visual branch through a
+              monolithic process.
+            </p>
+            <h3>2.2 Process diagrams become a second programming language</h3>
+            <p>
+              Large BPMN estates create two executable worlds: process DSL
+              (Domain Specific language) plus application code. Engineers must
+              reason about transactionality, retries, error semantics, code
+              deployment and version compatibility across both. In practice,
+              important logic migrates into scripts, expressions, listeners and
+              external services, so the diagram ceases to be a reliable single
+              source of truth.
+            </p>
+            <h3>2.3 Adaptive work is awkward to model</h3>
+            <p>
+              Modern onboarding, investigations and servicing are not only
+              sequences. They are goal-driven case-management problems: gather
+              sufficient evidence, satisfy applicable obligations, resolve
+              contradictions and then commit a controlled outcome. The next best
+              action can depend on evidence discovered during execution. This
+              maps naturally to a state graph where nodes can calculate
+              obligations or spawn bounded specialist subgraphs.
+            </p>
+            <h3>2.4 BPMN remains useful — but in a different role</h3>
+            <div class="callout amber">
+              <strong>Do not create a false dichotomy.</strong> BPMN can remain
+              a business communication notation and may continue to run selected
+              stable commodity processes. The strategic shift is to stop
+              treating BPMN engines as the mandatory orchestration substrate for
+              every complex process.
+            </div>
+            <table>
+              <tr>
+                <th>Use BPMN when…</th>
+                <th>Prefer agentic graph when…</th>
+              </tr>
+              <tr>
+                <td>
+                  Sequence is stable, low-dimensional and already well served.
+                </td>
+                <td>Routing is data/policy-driven and changes frequently.</td>
+              </tr>
+              <tr>
+                <td>Process is primarily task hand-off.</td>
+                <td>
+                  Process is primarily state/evidence convergence toward a goal.
+                </td>
+              </tr>
+              <tr>
+                <td>Few exception types exist.</td>
+                <td>Exceptions are numerous and context-dependent.</td>
+              </tr>
+              <tr>
+                <td>No probabilistic reasoning is needed.</td>
+                <td>
+                  Deterministic and probabilistic capabilities must coexist.
+                </td>
+              </tr>
+              <tr>
+                <td>Replacing it provides little economic benefit.</td>
+                <td>
+                  Process-model complexity is already constraining change.
+                </td>
+              </tr>
+            </table>
+          </section>
+          <section id="definitions">
+            <h2>3. What “agent” means in this architecture</h2>
+            <p>
+              The term <em>agent</em> is overloaded. For a regulated bank, the
+              definition must be engineering-grade.
+            </p>
+            <div class="callout purple">
+              <strong>Enterprise agent:</strong> a stateful software component
+              responsible for achieving a bounded business objective by
+              observing state, evaluating policy, invoking only authorized
+              capabilities, recording evidence and terminating in a declared
+              outcome or escalation state.
+            </div>
+            <h3>3.1 Five properties of every bank agent</h3>
+            <div class="grid3">
+              <div class="card">
+                <h4>1 · Bounded objective</h4>
+                <p>
+                  Example: “establish FATCA/CRS profile” — not “complete
+                  onboarding however you think best.”
+                </p>
+              </div>
+              <div class="card">
+                <h4>2 · Typed state</h4>
+                <p>
+                  Pydantic/JSON Schema contracts, explicit versioning and clear
+                  ownership of every field.
+                </p>
+              </div>
+              <div class="card">
+                <h4>3 · Capability allow-list</h4>
+                <p>
+                  Tools are application functions/APIs with authorization; the
+                  model never receives arbitrary network access.
+                </p>
+              </div>
+              <div class="card">
+                <h4>4 · Policy envelope</h4>
+                <p>
+                  Applicable obligations, entitlements, thresholds, approvals
+                  and prohibited actions are externalized from prompts.
+                </p>
+              </div>
+              <div class="card">
+                <h4>5 · Evidence trail</h4>
+                <p>
+                  Every decision and action carries inputs, policy version,
+                  model version if applicable, result, timestamps and
+                  correlation IDs.
+                </p>
+              </div>
+              <div class="card">
+                <h4>6 · Termination contract</h4>
+                <p>
+                  Completed, failed, timed-out, awaiting-human, awaiting-client,
+                  compensating or escalated are explicit states.
+                </p>
+              </div>
+            </div>
+            <h3>3.2 Four agent classes</h3>
+            <table>
+              <tr>
+                <th>Class</th>
+                <th>LLM?</th>
+                <th>Examples</th>
+                <th>Control expectation</th>
+              </tr>
+              <tr>
+                <td><strong>D0 — deterministic agent</strong></td>
+                <td>No</td>
+                <td>
+                  Eligibility, sequencing, limit checks, routing, timers, policy
+                  evaluation.
+                </td>
+                <td>
+                  Unit-testable, reproducible, same state + same policy → same
+                  result.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong
+                    >D1 — deterministic agent using model-derived facts</strong
+                  >
+                </td>
+                <td>Not for decision</td>
+                <td>
+                  Tax rule evaluation after an LLM extracts fields from a
+                  W-8BEN-E.
+                </td>
+                <td>
+                  Probabilistic extraction is isolated; final decision is
+                  code/rules.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>P1 — bounded probabilistic agent</strong></td>
+                <td>Yes</td>
+                <td>
+                  Document classification, entity resolution candidate ranking,
+                  summarization.
+                </td>
+                <td>
+                  Typed output, confidence/evidence, no high-impact write
+                  without deterministic validation.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>P2 — planning agent</strong></td>
+                <td>Yes</td>
+                <td>
+                  Exception investigation or evidence collection strategy.
+                </td>
+                <td>
+                  Strict tool allow-list, budget, step limit, approval gates,
+                  full trace.
+                </td>
+              </tr>
+            </table>
+            <p>
+              This classification becomes a governance primitive. Most of the
+              core control flow for onboarding should be D0/D1. P1/P2 should be
+              used selectively, where semantic ambiguity creates real value.
+            </p>
+          </section>
+          <section id="principles">
+            <h2>4. Architecture principles</h2>
+            <div class="arch-rule">
+              <div class="n">1</div>
+              <div>
+                <strong>Determinism is implemented, not prompted.</strong>
+                Mandatory rules belong in
+                code/policy/schema/authorization/topology.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">2</div>
+              <div>
+                <strong>State over sequence.</strong> Store facts, obligations,
+                evidence and decisions. Derive the next action from them.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">3</div>
+              <div>
+                <strong>LLMs propose; deterministic controls dispose.</strong> A
+                model may recommend, classify or extract. Critical state changes
+                are validated by non-model controls.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">4</div>
+              <div>
+                <strong>Small specialist agents beat general agents.</strong>
+                Narrow context reduces hallucination surface and simplifies
+                evaluation.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">5</div>
+              <div>
+                <strong>Policy version is part of case state.</strong> A case
+                must always be explainable against the exact policy bundle that
+                governed it.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">6</div>
+              <div>
+                <strong>Every side effect is idempotent.</strong> Durable
+                runtimes may replay nodes. Payment/account/client-record writes
+                require idempotency keys and transactional boundaries.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">7</div>
+              <div>
+                <strong>Humans are exception authorities, not glue.</strong>
+                Human-in-the-loop should be triggered by explicit
+                policy/confidence/risk conditions.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">8</div>
+              <div>
+                <strong>Authorization is outside the model.</strong> Agent
+                identity, user-delegated authority and tool-level entitlements
+                are enforced by the platform.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">9</div>
+              <div>
+                <strong>Evidence before narrative.</strong> Persist source facts
+                and provenance; regenerate summaries rather than treating prose
+                as source-of-truth.
+              </div>
+            </div>
+            <div class="arch-rule">
+              <div class="n">10</div>
+              <div>
+                <strong>Design for replay.</strong> Given case state, code,
+                policy and model snapshots, the bank must reconstruct why an
+                action occurred.
+              </div>
+            </div>
+          </section>
+          <section id="refarch">
+            <h2>5. Reference architecture</h2>
+            <p class="lead">
+              The recommended runtime is a graph-based case orchestrator, not a
+              free-running swarm. LangGraph is suitable because it exposes
+              state, nodes, edges, persistence, interrupts and subgraphs
+              directly rather than hiding orchestration behind an opaque
+              “autonomous agent” loop.
+            </p>
+            <div class="diagram">
+              <div class="diagram-title">
+                Figure 1 · Two-plane agentic banking architecture
+              </div>
+              <svg
+                aria-label="Two-plane agentic banking architecture"
+                height="520"
+                role="img"
+                viewbox="0 0 1000 520"
+                width="1000"
+              >
+                <rect
+                  fill="#e0f2fe"
+                  height="90"
+                  rx="12"
+                  stroke="#0284c7"
+                  width="950"
+                  x="25"
+                  y="25"
+                ></rect>
+                <text
+                  fill="#0c4a6e"
+                  font-size="17"
+                  font-weight="700"
+                  x="50"
+                  y="58"
+                >
+                  Experience &amp; Trigger Plane
+                </text>
+                <text fill="#334155" font-size="13" x="50" y="84">
+                  CRM · client portal · RM desktop · event bus · batch triggers
+                  · operations UI · API consumers
+                </text>
+                <rect
+                  fill="#eff6ff"
+                  height="145"
+                  rx="12"
+                  stroke="#1d4ed8"
+                  width="950"
+                  x="25"
+                  y="140"
+                ></rect>
+                <text
+                  fill="#1e3a8a"
+                  font-size="17"
+                  font-weight="700"
+                  x="50"
+                  y="172"
+                >
+                  Deterministic Control Plane — LangGraph runtime
+                </text>
+                <rect
+                  fill="#fff"
+                  height="62"
+                  rx="8"
+                  stroke="#64748b"
+                  width="170"
+                  x="55"
+                  y="195"
+                ></rect>
+                <text font-size="13" font-weight="700" x="73" y="220">
+                  Case state
+                </text>
+                <text font-size="11" x="73" y="242">
+                  facts · obligations · status
+                </text>
+                <rect
+                  fill="#fff"
+                  height="62"
+                  rx="8"
+                  stroke="#64748b"
+                  width="170"
+                  x="245"
+                  y="195"
+                ></rect>
+                <text font-size="13" font-weight="700" x="263" y="220">
+                  Policy / rules
+                </text>
+                <text font-size="11" x="263" y="242">
+                  versions · eligibility · gates
+                </text>
+                <rect
+                  fill="#fff"
+                  height="62"
+                  rx="8"
+                  stroke="#64748b"
+                  width="170"
+                  x="435"
+                  y="195"
+                ></rect>
+                <text font-size="13" font-weight="700" x="453" y="220">
+                  Graph routing
+                </text>
+                <text font-size="11" x="453" y="242">
+                  edges · retries · interrupts
+                </text>
+                <rect
+                  fill="#fff"
+                  height="62"
+                  rx="8"
+                  stroke="#64748b"
+                  width="150"
+                  x="625"
+                  y="195"
+                ></rect>
+                <text font-size="13" font-weight="700" x="643" y="220">
+                  Tool gateway
+                </text>
+                <text font-size="11" x="643" y="242">
+                  auth · schema · idempotency
+                </text>
+                <rect
+                  fill="#fff"
+                  height="62"
+                  rx="8"
+                  stroke="#64748b"
+                  width="150"
+                  x="795"
+                  y="195"
+                ></rect>
+                <text font-size="13" font-weight="700" x="813" y="220">
+                  Audit / trace
+                </text>
+                <text font-size="11" x="813" y="242">
+                  events · evidence · lineage
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="180"
+                  rx="12"
+                  stroke="#15803d"
+                  width="460"
+                  x="25"
+                  y="310"
+                ></rect>
+                <text
+                  fill="#166534"
+                  font-size="17"
+                  font-weight="700"
+                  x="50"
+                  y="342"
+                >
+                  Deterministic capability zone
+                </text>
+                <text font-size="12" x="50" y="370">• Policy evaluation</text>
+                <text font-size="12" x="50" y="393">
+                  • Tax / KYC rule computation
+                </text>
+                <text font-size="12" x="50" y="416">
+                  • Entitlement &amp; SoD
+                </text>
+                <text font-size="12" x="50" y="439">
+                  • API writes / transactions
+                </text>
+                <text font-size="12" x="250" y="370">
+                  • Timers / SLA / retries
+                </text>
+                <text font-size="12" x="250" y="393">
+                  • Validation &amp; reconciliation
+                </text>
+                <text font-size="12" x="250" y="416">
+                  • Data residency routing
+                </text>
+                <text font-size="12" x="250" y="439">
+                  • Human approval gates
+                </text>
+                <rect
+                  fill="#f5f3ff"
+                  height="180"
+                  rx="12"
+                  stroke="#6d28d9"
+                  width="460"
+                  x="515"
+                  y="310"
+                ></rect>
+                <text
+                  fill="#5b21b6"
+                  font-size="17"
+                  font-weight="700"
+                  x="540"
+                  y="342"
+                >
+                  Probabilistic intelligence zone
+                </text>
+                <text font-size="12" x="540" y="370">
+                  • OCR / document understanding
+                </text>
+                <text font-size="12" x="540" y="393">
+                  • Semantic extraction
+                </text>
+                <text font-size="12" x="540" y="416">
+                  • Entity match ranking
+                </text>
+                <text font-size="12" x="540" y="439">
+                  • Adverse-media analysis
+                </text>
+                <text font-size="12" x="750" y="370">
+                  • Exception investigation
+                </text>
+                <text font-size="12" x="750" y="393">
+                  • Summaries / narratives
+                </text>
+                <text font-size="12" x="750" y="416">
+                  • Candidate next actions
+                </text>
+                <text font-size="12" x="750" y="439">
+                  • Frontier models: OpenAI / Claude
+                </text>
+              </svg>
+            </div>
+            <h3>5.1 Core platform services</h3>
+            <table>
+              <tr>
+                <th>Service</th>
+                <th>Purpose</th>
+                <th>Non-negotiable design requirement</th>
+              </tr>
+              <tr>
+                <td>Agent Runtime</td>
+                <td>LangGraph graphs/subgraphs, durable state, interrupts.</td>
+                <td>
+                  Persistent checkpointer; versioned graphs; replay semantics
+                  understood.
+                </td>
+              </tr>
+              <tr>
+                <td>Case State Store</td>
+                <td>Canonical current state and append-only state events.</td>
+                <td>
+                  Schema version, optimistic locking, immutable audit history.
+                </td>
+              </tr>
+              <tr>
+                <td>Policy Decision Service</td>
+                <td>Applicable obligations and deterministic decisions.</td>
+                <td>
+                  Declarative rules, versioning, effective dates, maker-checker
+                  deployment.
+                </td>
+              </tr>
+              <tr>
+                <td>Tool Gateway</td>
+                <td>Only path to bank capabilities.</td>
+                <td>
+                  mTLS/OAuth, workload identity, schema validation, idempotency,
+                  quotas.
+                </td>
+              </tr>
+              <tr>
+                <td>Model Gateway</td>
+                <td>OpenAI/Claude/model routing.</td>
+                <td>
+                  Data classification, region/model allow-list, token controls,
+                  logging policy, fallback.
+                </td>
+              </tr>
+              <tr>
+                <td>Evidence Store</td>
+                <td>Source docs, extracts, citations, model evidence.</td>
+                <td>
+                  Immutable hashes, retention, privacy and jurisdiction tags.
+                </td>
+              </tr>
+              <tr>
+                <td>Human Workbench</td>
+                <td>Review/approve/edit interrupt payloads.</td>
+                <td>
+                  Entitlement checks, reason codes, four-eyes where required.
+                </td>
+              </tr>
+              <tr>
+                <td>Observability</td>
+                <td>Technical + business + model traces.</td>
+                <td>
+                  One correlation ID across graph, policy, model and downstream
+                  APIs.
+                </td>
+              </tr>
+            </table>
+          </section>
+          <section id="det">
+            <h2>
+              6. Deterministic agents: replacing BPMN without replacing
+              certainty
+            </h2>
+            <p>
+              A deterministic agent is essentially a
+              <strong
+                >stateful domain service with explicit goals and graph
+                semantics</strong
+              >. It can observe state, evaluate rules, invoke tools and select
+              transitions, but the selection is code — not sampled model output.
+            </p>
+            <h3>6.1 The equivalence with familiar BPMN constructs</h3>
+            <table>
+              <tr>
+                <th>BPMN concept</th>
+                <th>Agentic replacement</th>
+                <th>Implementation</th>
+              </tr>
+              <tr>
+                <td>Service task</td>
+                <td>Deterministic graph node</td>
+                <td>Python function / domain service / API tool.</td>
+              </tr>
+              <tr>
+                <td>Exclusive gateway</td>
+                <td>Conditional edge</td>
+                <td>Pure routing function over typed state.</td>
+              </tr>
+              <tr>
+                <td>Parallel gateway</td>
+                <td>Fan-out / subgraphs</td>
+                <td>Independent nodes with reducer-safe state updates.</td>
+              </tr>
+              <tr>
+                <td>Human task</td>
+                <td>Interrupt</td>
+                <td>Persisted graph state + entitlement-checked resume.</td>
+              </tr>
+              <tr>
+                <td>Timer</td>
+                <td>Scheduler/event trigger</td>
+                <td>Durable timer service emitting a case event.</td>
+              </tr>
+              <tr>
+                <td>Boundary error event</td>
+                <td>Typed exception + retry/escalation edge</td>
+                <td>Error taxonomy, retry policy, dead-letter state.</td>
+              </tr>
+              <tr>
+                <td>Call activity</td>
+                <td>Subgraph / agent capability</td>
+                <td>Versioned specialist graph with explicit input/output.</td>
+              </tr>
+              <tr>
+                <td>Compensation</td>
+                <td>Compensation command</td>
+                <td>Saga record with idempotent reversal capability.</td>
+              </tr>
+            </table>
+            <h3>6.2 Deterministic decisioning pattern</h3>
+            <p>
+              Assume a legal entity wants cash management in Singapore and
+              derivatives in the UK. The decision “is a regulatory
+              classification required?” is not an LLM question. The applicable
+              policy service returns obligations based on typed facts. The graph
+              merely routes to the required specialist agents.
+            </p>
+            <pre><code>from pydantic import BaseModel
+from typing import Literal
+
+class ClientFacts(BaseModel):
+    entity_type: Literal["LEGAL_PERSON", "FINANCIAL_INSTITUTION"]
+    incorporation_country: str
+    booking_countries: set[str]
+    products: set[str]
+
+class Obligations(BaseModel):
+    tax_profile: bool
+    kyc: bool
+    mifid_classification: bool
+    mas_classification: bool
+    enhanced_due_diligence: bool
+
+def derive_obligations(f: ClientFacts, policy) -&gt; Obligations:
+    # Pure deterministic evaluation. No LLM.
+    return Obligations(
+        tax_profile=True,
+        kyc=True,
+        mifid_classification=("GB" in f.booking_countries
+                              and "DERIVATIVES" in f.products),
+        mas_classification=("SG" in f.booking_countries
+                            and bool(f.products &amp; {"DERIVATIVES","FX"})),
+        enhanced_due_diligence=False,
+    )</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  ClientFacts and Obligations are typed contracts, avoiding
+                  loosely structured workflow payloads.
+                </li>
+                <li>
+                  derive_obligations is pure deterministic logic: it does not
+                  call an LLM or hidden planner.
+                </li>
+                <li>
+                  Jurisdiction and product facts directly determine whether
+                  MiFID or MAS obligations are required.
+                </li>
+                <li>
+                  In production, the conditions should move into a governed,
+                  versioned policy service rather than remain hard-coded.
+                </li>
+                <li>
+                  The key control property is reproducibility: same facts + same
+                  policy version produce the same obligations.
+                </li>
+              </ul>
+            </div>
+            <p>
+              In production, rules should be externalized into a governed policy
+              bundle rather than hard-coded. The important property is that
+              policy evaluation is <strong>referentially transparent</strong>:
+              same input facts + same policy version → same output.
+            </p>
+            <h3>6.3 “Next action” does not require an LLM planner</h3>
+            <p>
+              A common misconception is that agentic orchestration requires a
+              model to choose the next node. LangGraph supports conditional
+              edges defined by ordinary Python. A deterministic supervisor can
+              calculate which obligations are still open and dispatch the next
+              bounded subgraph.
+            </p>
+            <pre><code>def route_open_obligation(state: "OnboardingState") -&gt; str:
+    if state.status == "REJECTED":
+        return "end"
+    if not state.tax.complete:
+        return "tax_agent"
+    if not state.kyc.complete:
+        return "kyc_agent"
+    if state.mifid.required and not state.mifid.complete:
+        return "mifid_agent"
+    if state.has_blocking_exception:
+        return "human_resolution"
+    return "provisioning_agent"</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The router chooses the next capability only from persisted
+                  case state.
+                </li>
+                <li>
+                  The ordering is explicit: reject, tax, KYC, MiFID, human
+                  exception resolution, then provisioning.
+                </li>
+                <li>
+                  BPMN gateways become ordinary conditional edges that can be
+                  unit-tested and code-reviewed.
+                </li>
+                <li>
+                  Adding a new obligation is a controlled state/policy/routing
+                  change rather than another process-diagram permutation.
+                </li>
+                <li>Replaying the same state always selects the same edge.</li>
+              </ul>
+            </div>
+            <div class="callout green">
+              <strong
+                >This is the core answer to “how can agents be
+                deterministic?”</strong
+              >
+              The agent runtime is a state machine; the nodes are typed
+              software; the policy evaluation is deterministic; the graph edges
+              are deterministic. The word “agent” changes component
+              responsibility and composition — it does not require stochastic
+              control flow.
+            </div>
+            <h3>6.4 Deterministic agents can still be adaptive</h3>
+            <p>
+              Deterministic does not mean static. An agent may dynamically
+              discover new obligations because state changes. For example,
+              ownership enrichment may reveal a sanctioned nexus. A policy
+              recalculation deterministically adds an EDD obligation to the
+              case. The path changes because the facts changed, not because a
+              model improvised.
+            </p>
+          </section>
+          <section id="prob">
+            <h2>7. Probabilistic agents: where frontier models belong</h2>
+            <p>
+              Frontier models such as OpenAI and Claude are most valuable at
+              <strong>semantic boundaries</strong>: converting messy human-world
+              information into structured candidate facts, or reasoning over
+              evidence where exact algorithms are weak.
+            </p>
+            <h3>7.1 The probabilistic sandwich</h3>
+            <div class="diagram">
+              <div class="diagram-title">
+                Figure 2 · Probabilistic sandwich pattern
+              </div>
+              <svg height="220" viewbox="0 0 950 220" width="950">
+                <rect
+                  fill="#eff6ff"
+                  height="90"
+                  rx="10"
+                  stroke="#1d4ed8"
+                  width="220"
+                  x="30"
+                  y="60"
+                ></rect>
+                <text font-size="15" font-weight="700" x="55" y="92">
+                  Deterministic input gate
+                </text>
+                <text font-size="12" x="55" y="118">
+                  classification · redaction · schema
+                </text>
+                <text font-size="12" x="55" y="138">
+                  policy · model allow-list · scope
+                </text>
+                <rect
+                  fill="#f5f3ff"
+                  height="90"
+                  rx="10"
+                  stroke="#6d28d9"
+                  width="220"
+                  x="365"
+                  y="60"
+                ></rect>
+                <text font-size="15" font-weight="700" x="395" y="92">
+                  Probabilistic work
+                </text>
+                <text font-size="12" x="395" y="118">OpenAI / Claude</text>
+                <text font-size="12" x="395" y="138">
+                  extract · classify · reason
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="90"
+                  rx="10"
+                  stroke="#15803d"
+                  width="220"
+                  x="700"
+                  y="60"
+                ></rect>
+                <text font-size="15" font-weight="700" x="725" y="92">
+                  Deterministic output gate
+                </text>
+                <text font-size="12" x="725" y="118">
+                  JSON schema · validation · policy
+                </text>
+                <text font-size="12" x="725" y="138">
+                  confidence · evidence · authorization
+                </text>
+                <line
+                  stroke="#64748b"
+                  stroke-width="2"
+                  x1="250"
+                  x2="365"
+                  y1="105"
+                  y2="105"
+                ></line>
+                <polygon
+                  fill="#64748b"
+                  points="355,99 365,105 355,111"
+                ></polygon>
+                <line
+                  stroke="#64748b"
+                  stroke-width="2"
+                  x1="585"
+                  x2="700"
+                  y1="105"
+                  y2="105"
+                ></line>
+                <polygon
+                  fill="#64748b"
+                  points="690,99 700,105 690,111"
+                ></polygon>
+              </svg>
+            </div>
+            <p>
+              The model does not receive unrestricted context. The input gate
+              determines what data is permitted, which model/provider/region may
+              process it, and which tools are exposed. The output gate validates
+              schema, checks evidence, applies confidence thresholds and
+              determines whether the result can update authoritative state.
+            </p>
+            <h3>7.2 Structured output is necessary but not sufficient</h3>
+            <p>
+              LangChain supports structured responses using provider-native
+              schemas or tool calling. OpenAI also exposes JSON-schema-based
+              Structured Outputs, and Anthropic supports schema-defined
+              tools/structured outputs. Schema conformance prevents malformed
+              data; it does <strong>not</strong> prove the facts are true.
+              Therefore every extracted field should carry provenance.
+            </p>
+            <pre><code>class ExtractedTaxFact(BaseModel):
+    field: str
+    value: str | None
+    source_document_id: str
+    source_page: int
+    evidence_text: str
+    confidence: float
+
+class TaxDocumentExtraction(BaseModel):
+    document_type: Literal["W8BEN_E", "W9", "CRS_SELF_CERT", "UNKNOWN"]
+    facts: list[ExtractedTaxFact]
+    extraction_warnings: list[str]</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The LLM is constrained to a Pydantic schema instead of
+                  returning free-form prose.
+                </li>
+                <li>
+                  Every extracted fact carries document, page, evidence text and
+                  confidence for provenance.
+                </li>
+                <li>
+                  UNKNOWN document type and extraction warnings are explicit
+                  outputs rather than hidden uncertainty.
+                </li>
+                <li>
+                  Structured output is still not authoritative; deterministic
+                  validation and policy decide what the bank accepts.
+                </li>
+                <li>
+                  This makes model output reviewable, traceable and suitable for
+                  human escalation.
+                </li>
+              </ul>
+            </div>
+            <p>
+              A downstream deterministic Tax Agent decides whether those facts
+              satisfy policy. It should not ask the LLM “is the customer FATCA
+              compliant?” unless the bank has consciously classified that as a
+              model decision and applied model-risk controls.
+            </p>
+            <h3>7.3 Model portfolio, not model dependency</h3>
+            <p>
+              The model gateway should allow task-specific routing across
+              approved OpenAI and Claude models. The graph calls a logical
+              capability such as
+              <span class="inline">extract_tax_document</span>; the platform
+              decides provider/model based on data classification, latency,
+              cost, evaluation score, region availability and resilience. This
+              prevents model names from leaking throughout domain code.
+            </p>
+          </section>
+          <section id="example">
+            <h2>8. Worked example — new-to-bank corporate onboarding</h2>
+            <p class="lead">
+              A useful test of the thesis is a regulated process with
+              deterministic controls, uncertain documents, multiple
+              jurisdictions, long-running waits and human exceptions.
+            </p>
+            <h3>8.1 Business objective</h3>
+            <p>
+              “Create a legally usable client relationship and required product
+              accounts only after all applicable policy, tax, regulatory and KYC
+              obligations are satisfied, while minimizing client outreach and
+              manual operations.”
+            </p>
+            <h3>8.2 State model replaces the giant process diagram</h3>
+            <pre><code>class ObligationStatus(BaseModel):
+    required: bool = False
+    status: Literal["NOT_REQUIRED","OPEN","IN_PROGRESS","PASS","FAIL","WAIVED"] = "OPEN"
+    decision_id: str | None = None
+    evidence_ids: list[str] = []
+
+class OnboardingState(BaseModel):
+    case_id: str
+    policy_version: str
+    client_version: int
+    facts: ClientFacts
+    tax: ObligationStatus
+    kyc: ObligationStatus
+    mifid: ObligationStatus
+    mas: ObligationStatus
+    provisioning: ObligationStatus
+    open_exceptions: list[str] = []
+    status: Literal[
+        "ACTIVE","WAITING_CLIENT","WAITING_HUMAN","REJECTED","COMPLETED"
+    ] = "ACTIVE"</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The state object stores business obligations and outcomes
+                  rather than a token position on a process canvas.
+                </li>
+                <li>
+                  Each obligation records whether it is required, its current
+                  status, the decision and supporting evidence.
+                </li>
+                <li>
+                  Waiting, human-review, rejected and completed conditions are
+                  explicit lifecycle states.
+                </li>
+                <li>
+                  New obligations can be introduced through schema/policy
+                  evolution without modelling every end-to-end path.
+                </li>
+                <li>
+                  Persisted state enables safe pause, resume, replay and
+                  recovery for long-running onboarding cases.
+                </li>
+              </ul>
+            </div>
+            <p>
+              Rather than drawing every legal path, the case carries the status
+              of each obligation. The orchestration graph asks:
+              <strong
+                >what is required, what is already satisfied, and what is
+                blocking completion?</strong
+              >
+            </p>
+            <h3>8.3 Example runtime flow</h3>
+            <p>
+              The diagram uses two related visual conventions:
+              <strong>color shows the kind of control/capability</strong>, while
+              the
+              <strong
+                >D/P labels show how deterministic or probabilistic the agent
+                is</strong
+              >. The label therefore matters more than the word “agent”: a green
+              D0 agent is ordinary deterministic software packaged as an agent
+              capability; a purple P1 agent contains bounded model reasoning.
+            </p>
+            <div class="card" style="background: #fbfdff; margin: 16px 0 20px">
+              <h4 style="margin-top: 0">Legend · How to read Figure 3</h4>
+              <div class="grid2" style="margin: 10px 0 4px">
+                <div>
+                  <p style="font-weight: 700; margin-bottom: 6px">
+                    Agent / decision classes
+                  </p>
+                  <table style="margin: 0; font-size: 12.5px">
+                    <tr>
+                      <td style="width: 72px">
+                        <span class="tag det">D0</span>
+                      </td>
+                      <td>
+                        <strong>Fully deterministic.</strong> No LLM is used to
+                        make the decision. Rules, policy, exact algorithms or
+                        trusted API responses produce the outcome.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag det">D1</span></td>
+                      <td>
+                        <strong
+                          >Deterministic decision using model-derived
+                          facts.</strong
+                        >
+                        An LLM may have extracted or normalized an input fact,
+                        but the authoritative decision is still made by
+                        code/policy.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag prob">P1</span></td>
+                      <td>
+                        <strong>Bounded probabilistic specialist.</strong> An
+                        LLM performs a narrow semantic task such as extraction,
+                        classification, ranking or summarization and must return
+                        typed output with evidence/confidence.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          class="tag"
+                          style="background: #ffedd5; color: #9a3412"
+                          >P2</span
+                        >
+                      </td>
+                      <td>
+                        <strong>Bounded planning / investigation agent.</strong>
+                        The model may choose among allow-listed tools or
+                        investigation steps, but operates within step, cost,
+                        data and approval limits.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag det">Gate</span></td>
+                      <td>
+                        <strong>Deterministic validation gate.</strong> A
+                        code/policy check that accepts, rejects or escalates a
+                        P1/P2 result before it can affect an authoritative
+                        banking decision or write.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag ctrl">Human</span></td>
+                      <td>
+                        <strong>Authorized human control.</strong> Used where
+                        policy requires judgement, delegated authority,
+                        maker-checker or explicit exception approval.
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <div>
+                  <p style="font-weight: 700; margin-bottom: 6px">
+                    Color coding in the runtime graph
+                  </p>
+                  <table style="margin: 0; font-size: 12.5px">
+                    <tr>
+                      <td style="width: 34px">
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #eff6ff;
+                            border: 2px solid #1d4ed8;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Blue — trigger / control entry.</strong> Starts
+                        or receives the case/event into the controlled runtime.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #f0fdf4;
+                            border: 2px solid #15803d;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Green — deterministic execution.</strong> D0/D1
+                        policy, routing, validation or transactional capability.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #f5f3ff;
+                            border: 2px solid #6d28d9;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Purple — probabilistic intelligence.</strong>
+                        Usually a P1 model-backed semantic capability.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #fffbeb;
+                            border: 2px solid #b45309;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Amber — exception / hybrid reasoning.</strong>
+                        P1/P2 analysis may propose a resolution, but cannot
+                        bypass deterministic or human gates.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #fef2f2;
+                            border: 2px solid #b91c1c;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Red — human interrupt.</strong> Execution is
+                        durably paused for an authorized human decision.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span
+                          style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 4px;
+                            background: #0f172a;
+                            border: 2px solid #0f172a;
+                            vertical-align: middle;
+                          "
+                        ></span>
+                      </td>
+                      <td>
+                        <strong>Navy — terminal / evidence state.</strong>
+                        Controlled completion with an immutable
+                        decision/evidence manifest.
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <p class="mini" style="margin: 10px 0 0">
+                <strong>Rule of thumb:</strong> D = deterministic authority; P =
+                probabilistic assistance. Moving from P1 to P2 increases the
+                model's freedom to choose intermediate actions, so the required
+                controls become progressively stronger. High-impact banking
+                decisions and irreversible writes should terminate through D0/D1
+                or an explicitly authorized Human gate.
+              </p>
+            </div>
+            <div class="diagram">
+              <div class="diagram-title">
+                Figure 3 · Onboarding graph — deterministic spine with
+                probabilistic specialists
+              </div>
+              <svg height="540" viewbox="0 0 1050 540" width="1050">
+                <defs>
+                  <marker
+                    id="arr"
+                    markerheight="10"
+                    markerwidth="10"
+                    orient="auto"
+                    refx="9"
+                    refy="3"
+                  >
+                    <path d="M0,0 L0,6 L9,3 z" fill="#64748b"></path>
+                  </marker>
+                </defs>
+                <rect
+                  fill="#eff6ff"
+                  height="54"
+                  rx="8"
+                  stroke="#1d4ed8"
+                  width="160"
+                  x="30"
+                  y="30"
+                ></rect>
+                <text font-size="13" font-weight="700" x="57" y="62">
+                  Trigger / create case
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="54"
+                  rx="8"
+                  stroke="#15803d"
+                  width="170"
+                  x="245"
+                  y="30"
+                ></rect>
+                <text font-size="13" font-weight="700" x="276" y="62">
+                  Derive obligations
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="54"
+                  rx="8"
+                  stroke="#15803d"
+                  width="170"
+                  x="470"
+                  y="30"
+                ></rect>
+                <text font-size="13" font-weight="700" x="498" y="62">
+                  Deterministic router
+                </text>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="2"
+                  x1="190"
+                  x2="245"
+                  y1="57"
+                  y2="57"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="2"
+                  x1="415"
+                  x2="470"
+                  y1="57"
+                  y2="57"
+                ></line>
+                <rect
+                  fill="#f5f3ff"
+                  height="70"
+                  rx="8"
+                  stroke="#6d28d9"
+                  width="190"
+                  x="80"
+                  y="160"
+                ></rect>
+                <text font-size="13" font-weight="700" x="110" y="188">
+                  Evidence Agent (P1)
+                </text>
+                <text font-size="11" x="103" y="211">
+                  extract docs · source facts
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="70"
+                  rx="8"
+                  stroke="#15803d"
+                  width="190"
+                  x="315"
+                  y="160"
+                ></rect>
+                <text font-size="13" font-weight="700" x="360" y="188">
+                  Tax Agent (D1)
+                </text>
+                <text font-size="11" x="343" y="211">
+                  deterministic tax policy
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="70"
+                  rx="8"
+                  stroke="#15803d"
+                  width="190"
+                  x="550"
+                  y="160"
+                ></rect>
+                <text font-size="13" font-weight="700" x="594" y="188">
+                  KYC Agent (D1)
+                </text>
+                <text font-size="11" x="575" y="211">
+                  ownership · risk · screening
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="70"
+                  rx="8"
+                  stroke="#15803d"
+                  width="190"
+                  x="785"
+                  y="160"
+                ></rect>
+                <text font-size="13" font-weight="700" x="815" y="188">
+                  Regulatory Agent (D0)
+                </text>
+                <text font-size="11" x="825" y="211">MiFID · MAS rules</text>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="555"
+                  x2="175"
+                  y1="84"
+                  y2="160"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="555"
+                  x2="410"
+                  y1="84"
+                  y2="160"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="555"
+                  x2="645"
+                  y1="84"
+                  y2="160"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="555"
+                  x2="880"
+                  y1="84"
+                  y2="160"
+                ></line>
+                <rect
+                  fill="#fffbeb"
+                  height="70"
+                  rx="8"
+                  stroke="#b45309"
+                  width="200"
+                  x="190"
+                  y="310"
+                ></rect>
+                <text font-size="13" font-weight="700" x="226" y="338">
+                  Exception Resolver
+                </text>
+                <text font-size="11" x="220" y="361">
+                  P1/P2 proposes resolution
+                </text>
+                <rect
+                  fill="#fef2f2"
+                  height="70"
+                  rx="8"
+                  stroke="#b91c1c"
+                  width="200"
+                  x="455"
+                  y="310"
+                ></rect>
+                <text font-size="13" font-weight="700" x="493" y="338">
+                  Human interrupt
+                </text>
+                <text font-size="11" x="490" y="361">
+                  approval / edit / reject
+                </text>
+                <rect
+                  fill="#f0fdf4"
+                  height="70"
+                  rx="8"
+                  stroke="#15803d"
+                  width="200"
+                  x="720"
+                  y="310"
+                ></rect>
+                <text font-size="13" font-weight="700" x="748" y="338">
+                  Provisioning Agent
+                </text>
+                <text font-size="11" x="752" y="361">
+                  validated idempotent APIs
+                </text>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="645"
+                  x2="555"
+                  y1="230"
+                  y2="310"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="390"
+                  x2="455"
+                  y1="345"
+                  y2="345"
+                ></line>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="1.5"
+                  x1="655"
+                  x2="720"
+                  y1="345"
+                  y2="345"
+                ></line>
+                <rect
+                  fill="#0f172a"
+                  height="58"
+                  rx="8"
+                  stroke="#0f172a"
+                  width="390"
+                  x="395"
+                  y="450"
+                ></rect>
+                <text
+                  fill="white"
+                  font-size="14"
+                  font-weight="700"
+                  x="460"
+                  y="485"
+                >
+                  Case complete + immutable evidence manifest
+                </text>
+                <line
+                  marker-end="url(#arr)"
+                  stroke="#64748b"
+                  stroke-width="2"
+                  x1="820"
+                  x2="650"
+                  y1="380"
+                  y2="450"
+                ></line>
+              </svg>
+            </div>
+            <h3>8.4 Deterministic versus probabilistic responsibilities</h3>
+            <p>
+              Using the legend above, the table classifies each onboarding
+              activity by <strong>where decision authority sits</strong>. P1/P2
+              can interpret ambiguous evidence or propose actions, but a
+              <strong>Gate, D0/D1 node or Human authority</strong> controls
+              acceptance and any material downstream action.
+            </p>
+            <table>
+              <tr>
+                <th>Activity</th>
+                <th>Type</th>
+                <th>Why</th>
+              </tr>
+              <tr>
+                <td>Select applicable onboarding policy</td>
+                <td><span class="tag det">D0</span></td>
+                <td>
+                  Legal entity, booking location, product and segment are
+                  explicit facts.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Read uploaded certificate and extract registration number
+                </td>
+                <td><span class="tag prob">P1</span></td>
+                <td>Unstructured document understanding.</td>
+              </tr>
+              <tr>
+                <td>Validate registration number against trusted registry</td>
+                <td><span class="tag det">D0</span></td>
+                <td>API verification with exact response semantics.</td>
+              </tr>
+              <tr>
+                <td>Rank candidate entities across external data sources</td>
+                <td>
+                  <span class="tag prob">P1</span> +
+                  <span class="tag det">Gate</span>
+                </td>
+                <td>
+                  Fuzzy semantics, but acceptance threshold and GLEI match rules
+                  are deterministic.
+                </td>
+              </tr>
+              <tr>
+                <td>Determine FATCA documentary requirement</td>
+                <td><span class="tag det">D0</span></td>
+                <td>Policy decision.</td>
+              </tr>
+              <tr>
+                <td>Extract W-8BEN-E fields</td>
+                <td><span class="tag prob">P1</span></td>
+                <td>Document interpretation.</td>
+              </tr>
+              <tr>
+                <td>Determine whether tax profile passes</td>
+                <td><span class="tag det">D1</span></td>
+                <td>
+                  Uses extracted facts, but rule evaluation is deterministic.
+                </td>
+              </tr>
+              <tr>
+                <td>Summarize adverse media</td>
+                <td><span class="tag prob">P1</span></td>
+                <td>Semantic synthesis.</td>
+              </tr>
+              <tr>
+                <td>Trigger EDD because sanctions nexus exists</td>
+                <td><span class="tag det">D0</span></td>
+                <td>Control must be deterministic.</td>
+              </tr>
+              <tr>
+                <td>Approve policy exception</td>
+                <td><span class="tag ctrl">Human</span></td>
+                <td>
+                  Delegated authority with reason code and four-eyes control.
+                </td>
+              </tr>
+              <tr>
+                <td>Create account in transaction platform</td>
+                <td><span class="tag det">D0</span></td>
+                <td>Transactional side effect, idempotent and authorized.</td>
+              </tr>
+            </table>
+          </section>
+          <section id="code">
+            <h2>9. LangGraph / LangChain implementation pattern</h2>
+            <p>
+              LangGraph’s low-level graph model is a better fit for controlled
+              banking orchestration than a generic ReAct loop. LangChain’s
+              higher-level agents can still be embedded for bounded semantic
+              tasks.
+            </p>
+            <h3>9.1 State and deterministic nodes</h3>
+            <pre><code>from typing import TypedDict, Literal
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Command, interrupt
+
+class CaseState(TypedDict):
+    case_id: str
+    policy_version: str
+    facts: dict
+    obligations: dict
+    extracted_facts: dict
+    exceptions: list[dict]
+    status: str
+    audit: list[dict]
+
+def policy_node(state: CaseState):
+    obligations = policy_client.evaluate(
+        policy_version=state["policy_version"],
+        facts=state["facts"],
+    )
+    return {
+        "obligations": obligations,
+        "audit": [{
+            "event": "OBLIGATIONS_DERIVED",
+            "policy_version": state["policy_version"],
+            "decision_hash": obligations["decision_hash"],
+        }]
+    }
+
+def deterministic_route(state: CaseState) -&gt; str:
+    o = state["obligations"]
+    if state["status"] == "REJECTED":
+        return "end"
+    if o["tax"]["status"] == "OPEN":
+        return "tax"
+    if o["kyc"]["status"] == "OPEN":
+        return "kyc"
+    if any(e["severity"] == "BLOCKING" for e in state["exceptions"]):
+        return "human"
+    return "provision"</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  CaseState is the shared contract used by every node in the
+                  graph.
+                </li>
+                <li>
+                  policy_node evaluates a specific policy version and records a
+                  decision hash for auditability.
+                </li>
+                <li>
+                  deterministic_route selects the next edge from obligations and
+                  blocking exceptions only.
+                </li>
+                <li>
+                  The model is not allowed to decide orchestration;
+                  probabilistic agents may contribute facts to state.
+                </li>
+                <li>
+                  This separates semantic reasoning from the bank's
+                  authoritative control flow.
+                </li>
+              </ul>
+            </div>
+            <h3>9.2 Embed a bounded model agent only where needed</h3>
+            <p>
+              LangChain can enforce structured response formats. The model
+              output should be treated as a candidate fact set and validated
+              before authoritative state is updated.
+            </p>
+            <pre><code>from pydantic import BaseModel, Field
+from langchain.agents import create_agent
+
+class OwnershipExtraction(BaseModel):
+    entity_name: str
+    ownership_pct: float = Field(ge=0, le=100)
+    evidence: str
+    page: int
+    confidence: float = Field(ge=0, le=1)
+
+ownership_extractor = create_agent(
+    model=approved_model_router("ownership-extraction"),
+    tools=[read_document_pages],
+    response_format=OwnershipExtraction,
+    system_prompt=(
+        "Extract only ownership explicitly evidenced in the supplied document. "
+        "Do not infer missing percentages. Return page and evidence."
+    ),
+)
+
+def ownership_extract_node(state: CaseState):
+    result = ownership_extractor.invoke({
+        "messages": [{
+            "role": "user",
+            "content": f'Extract direct ownership for case {state["case_id"]}'
+        }]
+    })
+    candidate = result["structured_response"]
+
+    # Deterministic post-condition.
+    if candidate.confidence &lt; 0.92:
+        return {"exceptions": [{
+            "code": "LOW_CONFIDENCE_OWNERSHIP",
+            "severity": "BLOCKING",
+            "payload": candidate.model_dump()
+        }]}
+    return {"extracted_facts": {"ownership_candidate": candidate.model_dump()}}</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The model agent is deliberately bounded to one task:
+                  extracting ownership evidence.
+                </li>
+                <li>
+                  Its tool set is restricted to document reading and its
+                  response must conform to a typed schema.
+                </li>
+                <li>
+                  The prompt forbids inventing missing ownership percentages and
+                  requires source evidence.
+                </li>
+                <li>
+                  A deterministic confidence threshold creates a blocking
+                  exception when evidence is insufficient.
+                </li>
+                <li>
+                  The LLM proposes candidate facts; it cannot approve ownership
+                  or authorize downstream onboarding actions.
+                </li>
+              </ul>
+            </div>
+            <h3>9.3 Human-in-the-loop is an explicit state transition</h3>
+            <p>
+              LangGraph interrupts persist execution state. In bank use, the
+              resume endpoint must authenticate the human, verify entitlement
+              and persist the approval reason independently of the model.
+            </p>
+            <pre><code>def human_approval_node(state: CaseState):
+    request = {
+        "case_id": state["case_id"],
+        "action": "APPROVE_OWNERSHIP_EXCEPTION",
+        "exception": state["exceptions"][0],
+        "required_role": "KYC_APPROVER",
+    }
+
+    decision = interrupt(request)
+
+    # On resume, validate authenticated actor metadata supplied by trusted UI/API.
+    assert entitlement_service.can(
+        actor_id=decision["actor_id"],
+        action=request["action"],
+        case_id=state["case_id"],
+    )
+
+    if decision["decision"] == "REJECT":
+        return {"status": "REJECTED"}
+
+    return {
+        "exceptions": [],
+        "audit": [{
+            "event": "HUMAN_APPROVAL",
+            "actor_id": decision["actor_id"],
+            "reason_code": decision["reason_code"],
+        }]
+    }</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  interrupt creates a durable human checkpoint rather than a
+                  generic workflow inbox task.
+                </li>
+                <li>
+                  The request carries the precise case, action, exception and
+                  required approval role.
+                </li>
+                <li>
+                  On resume, the backend independently verifies the
+                  authenticated actor's entitlement.
+                </li>
+                <li>
+                  Reject and approve outcomes become explicit state transitions
+                  with audit evidence.
+                </li>
+                <li>
+                  The human decision is therefore attributable, resumable and
+                  enforceable as part of the graph contract.
+                </li>
+              </ul>
+            </div>
+            <h3>9.4 Assemble the graph</h3>
+            <pre><code>builder = StateGraph(CaseState)
+
+builder.add_node("policy", policy_node)
+builder.add_node("tax", tax_subgraph)
+builder.add_node("kyc", kyc_subgraph)
+builder.add_node("human", human_approval_node)
+builder.add_node("provision", provisioning_node)
+
+builder.add_edge(START, "policy")
+builder.add_conditional_edges(
+    "policy",
+    deterministic_route,
+    {
+        "tax": "tax",
+        "kyc": "kyc",
+        "human": "human",
+        "provision": "provision",
+        "end": END,
+    },
+)
+
+# After each specialist completes, recalculate obligations and route again.
+builder.add_edge("tax", "policy")
+builder.add_edge("kyc", "policy")
+builder.add_edge("human", "policy")
+builder.add_edge("provision", END)
+
+graph = builder.compile(checkpointer=production_checkpointer)</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  StateGraph composes specialist capabilities while retaining a
+                  deterministic control spine.
+                </li>
+                <li>
+                  Policy evaluation is the entry point; conditional edges choose
+                  the next specialist from current state.
+                </li>
+                <li>
+                  Each specialist loops back to policy so obligations can be
+                  recalculated as new facts arrive.
+                </li>
+                <li>
+                  A production checkpointer makes execution durable across
+                  outages and onboarding cases lasting days or weeks.
+                </li>
+                <li>
+                  Provisioning reaches END only after the deterministic routing
+                  conditions are satisfied.
+                </li>
+              </ul>
+            </div>
+            <div class="callout amber">
+              <strong>Engineering note on interrupts/replay:</strong> durable
+              execution can restart a node when resuming. Code before an
+              interrupt or retry boundary must therefore be idempotent.
+              LangGraph’s own documentation explicitly warns that side effects
+              before interrupts should be idempotent.
+            </div>
+            <h3>9.5 Idempotent side-effect pattern</h3>
+            <pre><code>def provisioning_node(state: CaseState):
+    idem_key = f'{state["case_id"]}:PROVISION:{state["policy_version"]}'
+
+    # API guarantees same idempotency key cannot create a second account.
+    response = account_api.create_account(
+        request=build_account_request(state),
+        idempotency_key=idem_key,
+        workload_identity=current_agent_identity(),
+    )
+
+    return {
+        "obligations": mark_provisioning_passed(
+            state["obligations"], response.account_id
+        ),
+        "audit": [{
+            "event": "ACCOUNT_PROVISIONED",
+            "idempotency_key": idem_key,
+            "downstream_ref": response.request_id,
+        }],
+    }</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The idempotency key binds the side effect to case, operation
+                  and policy version.
+                </li>
+                <li>
+                  The downstream account API must guarantee that retrying the
+                  same key cannot create a duplicate account.
+                </li>
+                <li>
+                  Workload identity lets the platform authorize the agent
+                  independently of a model or human user.
+                </li>
+                <li>
+                  Downstream request references are persisted into the audit
+                  trail.
+                </li>
+                <li>
+                  This pattern is essential because durable graphs may
+                  legitimately retry a node after failure or restart.
+                </li>
+              </ul>
+            </div>
+            <h3>9.6 Do not allow the model to manufacture tool authority</h3>
+            <pre><code># Bad
+@tool
+def execute_sql(sql: str): ...
+
+# Better: business capability with constrained schema
+class CreateAccountRequest(BaseModel):
+    legal_entity_id: str
+    booking_location: Literal["SG","GB","HK"]
+    product: Literal["CASA","FX","DERIVATIVES"]
+    approved_case_id: str
+
+@tool
+def create_account(req: CreateAccountRequest) -&gt; AccountResult:
+    # Server independently verifies case status + caller identity + policy evidence.
+    authorize(req)
+    validate_case_ready(req.approved_case_id)
+    return core_platform.create(req)</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  A raw SQL tool gives a model broad, difficult-to-govern
+                  authority and is therefore the anti-pattern.
+                </li>
+                <li>
+                  The preferred tool exposes a narrow business capability with a
+                  typed request and permitted values.
+                </li>
+                <li>
+                  The server independently authorizes the call and verifies that
+                  the onboarding case is ready.
+                </li>
+                <li>
+                  A model may request a capability but cannot grant itself
+                  permission or bypass policy checks.
+                </li>
+                <li>
+                  The tool interface becomes a security and control boundary,
+                  not merely an integration convenience.
+                </li>
+              </ul>
+            </div>
+          </section>
+          <section id="control">
+            <h2>10. Enterprise-grade control architecture</h2>
+            <p>
+              Agentic systems should increase control quality because controls
+              can be centralized, typed and observable rather than spread across
+              workflow expressions and scripts.
+            </p>
+            <h3>10.1 Control hierarchy</h3>
+            <table>
+              <tr>
+                <th>Layer</th>
+                <th>Control</th>
+                <th>Example</th>
+              </tr>
+              <tr>
+                <td>Identity</td>
+                <td>Workload identity for every agent/subgraph.</td>
+                <td>
+                  <span class="inline"
+                    >spiffe://bank/cib/onboarding/tax-agent</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Authorization</td>
+                <td>Tool gateway checks capability + data scope.</td>
+                <td>
+                  KYC Agent may read screening but cannot provision an account.
+                </td>
+              </tr>
+              <tr>
+                <td>Policy</td>
+                <td>Versioned deterministic rule evaluation.</td>
+                <td>EDD required for specific sanctions/PEP conditions.</td>
+              </tr>
+              <tr>
+                <td>Schema</td>
+                <td>Input/output contracts.</td>
+                <td>Country codes, legal entity IDs, decision enums.</td>
+              </tr>
+              <tr>
+                <td>State</td>
+                <td>Legal transition validation.</td>
+                <td>Cannot transition from TAX_FAIL to READY_TO_PROVISION.</td>
+              </tr>
+              <tr>
+                <td>Human</td>
+                <td>Entitlement + maker/checker.</td>
+                <td>High-risk client approval needs independent approver.</td>
+              </tr>
+              <tr>
+                <td>Model</td>
+                <td>Provider/task allow-list + evaluation threshold.</td>
+                <td>
+                  Only approved model deployment can process confidential client
+                  docs.
+                </td>
+              </tr>
+              <tr>
+                <td>Data</td>
+                <td>Residency, classification and minimization.</td>
+                <td>
+                  China-resident source documents remain within approved region.
+                </td>
+              </tr>
+              <tr>
+                <td>Runtime</td>
+                <td>Step budget, timeout, retry, circuit breaker.</td>
+                <td>
+                  P2 investigator limited to 8 tool calls before escalation.
+                </td>
+              </tr>
+              <tr>
+                <td>Evidence</td>
+                <td>Immutable provenance and hashes.</td>
+                <td>Decision stores source IDs and policy decision hash.</td>
+              </tr>
+            </table>
+            <h3>10.2 Policy-as-code contract</h3>
+            <p>
+              Policy should produce machine-readable <em>obligations</em>, not
+              process routes. This is a crucial decoupling.
+            </p>
+            <pre><code>{
+  "policy_id": "CIB-ONBOARDING-GLOBAL",
+  "version": "2026.08.4",
+  "effective_from": "2026-09-01",
+  "input_schema": "ClientFacts.v7",
+  "decision": {
+    "obligations": [
+      {"type":"TAX_PROFILE","owner_agent":"tax-agent","blocking":true},
+      {"type":"KYC","owner_agent":"kyc-agent","blocking":true},
+      {"type":"MIFID_CLASSIFICATION","owner_agent":"reg-agent","blocking":true}
+    ]
+  },
+  "decision_hash": "sha256:..."
+}</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The policy artifact is explicitly versioned, effective-dated
+                  and tied to an input schema.
+                </li>
+                <li>
+                  Obligations declaratively state their type, responsible agent
+                  and whether they block completion.
+                </li>
+                <li>
+                  The decision hash enables exact replay and proves which policy
+                  result drove the case.
+                </li>
+                <li>
+                  The graph consumes obligations rather than hard-coding every
+                  jurisdiction/product process path.
+                </li>
+                <li>
+                  Global rules and country deltas can therefore evolve
+                  independently under policy lifecycle governance.
+                </li>
+              </ul>
+            </div>
+            <p>
+              The graph does not need to know why MiFID applies. It knows an
+              obligation exists, who owns it and whether it blocks completion.
+              The rule engine can change without redesigning the orchestrator.
+            </p>
+            <h3>10.3 Model risk</h3>
+            <p>
+              In April 2026, the Federal Reserve, OCC and FDIC issued revised
+              guidance on model risk management, superseding SR 11-7. The
+              architecture should assume model-risk expectations around
+              development/use, validation/monitoring, governance and third-party
+              models may apply to material AI components. The safest design
+              minimizes the number of material control decisions made by a model
+              and makes every model contribution measurable and replaceable.
+            </p>
+            <div class="callout red">
+              <strong>Anti-pattern:</strong> “temperature = 0” is not a control.
+              It may reduce sampling variability, but it does not convert a
+              language model into a policy engine, guarantee factual correctness
+              or guarantee identical outputs across provider/model changes.
+            </div>
+          </section>
+          <section id="obs">
+            <h2>11. Observability, audit and explainability</h2>
+            <p>
+              The bank needs three observability layers on one trace: technical
+              execution, business progress and model behavior.
+            </p>
+            <h3>11.1 Canonical agent event</h3>
+            <pre><code>{
+  "event_id": "evt-...",
+  "trace_id": "trc-...",
+  "case_id": "ONB-2026-004921",
+  "agent": "tax-agent",
+  "agent_version": "3.8.1",
+  "node": "fatca_decision",
+  "event_type": "DECISION",
+  "timestamp": "2026-08-30T12:14:22.928Z",
+  "input_state_hash": "sha256:...",
+  "policy": {"id":"TAX-GLOBAL","version":"2026.08.2"},
+  "model": null,
+  "tool_calls": ["tax_registry.verify:rq-8912"],
+  "decision": {"status":"PASS","reason_codes":["FATCA_04"]},
+  "evidence_ids": ["doc-92#p3","registry-77"],
+  "duration_ms": 81
+}</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The event captures trace, case, agent, node and timing
+                  information in a common telemetry contract.
+                </li>
+                <li>
+                  Input-state hash and policy version make the decision
+                  reproducible and comparable during investigation.
+                </li>
+                <li>
+                  model:null clearly identifies a deterministic node;
+                  probabilistic nodes would record model/version metadata.
+                </li>
+                <li>
+                  Tool calls and evidence IDs link the decision to both external
+                  actions and supporting evidence.
+                </li>
+                <li>
+                  The same event stream supports technical observability, audit
+                  and business activity monitoring.
+                </li>
+              </ul>
+            </div>
+            <h3>11.2 For an LLM node, add model telemetry</h3>
+            <ul>
+              <li>
+                Logical task name, provider, model snapshot/deployment, region.
+              </li>
+              <li>
+                Prompt-template version and context-policy version — not
+                necessarily raw prompt if that violates privacy.
+              </li>
+              <li>
+                Input/output token counts, latency, retry count and cost
+                allocation.
+              </li>
+              <li>
+                Structured-output validation result and semantic confidence.
+              </li>
+              <li>Evidence references and groundedness score.</li>
+              <li>Safety/redaction results and data-classification tags.</li>
+              <li>
+                Evaluation cohort and benchmark score for the deployed
+                prompt/model combination.
+              </li>
+            </ul>
+            <h3>11.3 Business activity monitoring improves</h3>
+            <p>
+              Because obligations are first-class state, operations no longer
+              needs to infer progress from workflow node names. Dashboards can
+              directly answer: percentage of cases blocked on client evidence,
+              EDD volume by policy reason, median time from tax evidence receipt
+              to decision, model low-confidence rate, human override rate, and
+              policy-version impact.
+            </p>
+          </section>
+          <section id="testing">
+            <h2>12. Testing and assurance</h2>
+            <p>
+              The most important engineering advantage of this architecture is
+              that it allows different assurance techniques for deterministic
+              and probabilistic components.
+            </p>
+            <h3>12.1 Deterministic assurance</h3>
+            <div class="grid2">
+              <div class="card">
+                <h4>Unit &amp; property tests</h4>
+                <p>
+                  Every transition, policy adapter and validator. Property: no
+                  state can reach READY_TO_PROVISION while a blocking obligation
+                  is OPEN/FAIL.
+                </p>
+              </div>
+              <div class="card">
+                <h4>Golden case replay</h4>
+                <p>
+                  Historical cases are replayed against a proposed graph/policy
+                  version and diffs are reviewed before deployment.
+                </p>
+              </div>
+              <div class="card">
+                <h4>Contract tests</h4>
+                <p>
+                  Tool schemas, API error taxonomy, idempotency and
+                  authorization.
+                </p>
+              </div>
+              <div class="card">
+                <h4>Failure injection</h4>
+                <p>
+                  Timeouts, duplicated events, stale state, downstream outages,
+                  partial writes, resume-after-crash.
+                </p>
+              </div>
+            </div>
+            <pre><code>def test_never_provision_with_open_blocking_obligation():
+    for case in generated_case_states():
+        if any(o["blocking"] and o["status"] != "PASS"
+               for o in case["obligations"].values()):
+            assert deterministic_route(case) != "provision"</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  This is a property-style test over many generated case states
+                  rather than only hand-written happy paths.
+                </li>
+                <li>
+                  Its invariant is simple: any open blocking obligation must
+                  make provisioning unreachable.
+                </li>
+                <li>
+                  The test exercises the deterministic router directly, without
+                  needing a model or full integration environment.
+                </li>
+                <li>
+                  It detects routing regressions when new obligation types or
+                  statuses are introduced.
+                </li>
+                <li>
+                  Deterministic agent graphs make this kind of exhaustive
+                  control testing practical.
+                </li>
+              </ul>
+            </div>
+            <h3>12.2 Probabilistic assurance</h3>
+            <ul>
+              <li>
+                <strong>Task-specific benchmark datasets</strong>, not generic
+                model benchmarks.
+              </li>
+              <li>
+                Field-level precision/recall for extraction;
+                false-positive/false-negative costs documented.
+              </li>
+              <li>
+                Groundedness: every material extracted fact must point to
+                evidence.
+              </li>
+              <li>
+                Robustness across document layout, language, poor scans and
+                adversarial text.
+              </li>
+              <li>
+                Human override and downstream rejection rates monitored after
+                deployment.
+              </li>
+              <li>
+                Champion/challenger testing across approved OpenAI/Claude
+                deployments.
+              </li>
+              <li>
+                Model or prompt change cannot silently change a control outcome;
+                it must pass replay gates.
+              </li>
+            </ul>
+            <h3>12.3 End-to-end invariant tests</h3>
+            <p>
+              Traditional workflow testing often enumerates paths. Agentic
+              testing should focus more on <strong>invariants</strong> over
+              state:
+            </p>
+            <pre><code>INVARIANT 1: no account exists unless case.status == COMPLETED
+INVARIANT 2: every completed case has a policy_version and evidence_manifest
+INVARIANT 3: no model can directly set a human approval field
+INVARIANT 4: every authoritative fact has provenance
+INVARIANT 5: every side-effect tool call has an idempotency key
+INVARIANT 6: no cross-border model call violates the data residency decision</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  These invariants are non-negotiable banking controls that
+                  apply regardless of which path the case followed.
+                </li>
+                <li>
+                  They prevent completion without required policy versioning,
+                  evidence and provenance.
+                </li>
+                <li>
+                  They explicitly prohibit a model from setting fields that
+                  represent human approval.
+                </li>
+                <li>
+                  They require idempotency for side effects and enforce
+                  data-residency constraints around model calls.
+                </li>
+                <li>
+                  Control-as-code is testable continuously, rather than relying
+                  on visual inspection of every BPMN path.
+                </li>
+              </ul>
+            </div>
+            <p>
+              This is a more scalable assurance approach than proving thousands
+              of graphical paths individually.
+            </p>
+          </section>
+          <section id="platform">
+            <h2>13. Engineering platform blueprint</h2>
+            <h3>13.1 Recommended logical stack</h3>
+            <table>
+              <tr>
+                <th>Layer</th>
+                <th>Recommended role</th>
+              </tr>
+              <tr>
+                <td>Domain agent SDK</td>
+                <td>
+                  Bank wrapper around LangGraph/LangChain: state base classes,
+                  agent identity, trace middleware, tool client, policy client,
+                  model client, error taxonomy.
+                </td>
+              </tr>
+              <tr>
+                <td>Graph runtime</td>
+                <td>
+                  LangGraph v1+ StateGraph/subgraphs, persistent checkpointer,
+                  controlled interrupts.
+                </td>
+              </tr>
+              <tr>
+                <td>Model abstraction</td>
+                <td>
+                  Bank Model Gateway routing to approved OpenAI/Claude
+                  deployments; provider-native structured output where
+                  supported.
+                </td>
+              </tr>
+              <tr>
+                <td>Policy</td>
+                <td>
+                  Enterprise policy decision service; rules represented
+                  declaratively and released independently.
+                </td>
+              </tr>
+              <tr>
+                <td>Tooling</td>
+                <td>
+                  API gateway/service mesh plus logical Tool Gateway. Tools map
+                  to business capabilities, not arbitrary CRUD.
+                </td>
+              </tr>
+              <tr>
+                <td>State</td>
+                <td>
+                  Relational state/checkpoint store plus append-only event/audit
+                  store; object store for evidence.
+                </td>
+              </tr>
+              <tr>
+                <td>Messaging</td>
+                <td>
+                  Kafka/event bus for triggers and domain events; outbox pattern
+                  for transactional publication.
+                </td>
+              </tr>
+              <tr>
+                <td>Observability</td>
+                <td>
+                  OpenTelemetry-compatible traces plus agent/model metadata;
+                  LangSmith may be used in approved development environments
+                  subject to bank data policy.
+                </td>
+              </tr>
+              <tr>
+                <td>Security</td>
+                <td>
+                  Workload identity, secrets management, mTLS, RBAC/ABAC,
+                  DLP/redaction, egress control.
+                </td>
+              </tr>
+            </table>
+            <h3>13.2 Agent manifest</h3>
+            <p>
+              Every production agent should be deployed with a machine-readable
+              manifest so architecture, security and operations can discover its
+              authority.
+            </p>
+            <pre><code>apiVersion: bank.ai/v1
+kind: Agent
+metadata:
+  name: tax-agent
+  version: 3.8.1
+spec:
+  class: D1
+  objective: "Establish jurisdiction-specific client tax profile"
+  stateSchema: TaxState.v5
+  allowedTools:
+    - tax-registry.read
+    - document-evidence.read
+    - tax-profile.write
+  allowedModels:
+    - logical-task: tax-document-extraction
+  policyNamespaces:
+    - TAX.GLOBAL
+    - TAX.COUNTRY
+  dataClasses: [CONFIDENTIAL_CLIENT]
+  humanInterrupts:
+    - TAX_EXCEPTION_APPROVAL
+  maxExecution:
+    steps: 30
+    elapsed: P30D
+  owner: ClientTaxTechnology</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  The manifest treats an agent as a governed production workload
+                  with a versioned contract.
+                </li>
+                <li>
+                  Class D1 identifies a deterministic decisioning agent that may
+                  consume model-derived facts.
+                </li>
+                <li>
+                  Allow-listed tools, models and policy namespaces constrain
+                  authority and blast radius.
+                </li>
+                <li>
+                  Data classification, human interrupts and execution budgets
+                  are declared up front.
+                </li>
+                <li>
+                  Named ownership and versioning create operational
+                  accountability and controlled deployment.
+                </li>
+              </ul>
+            </div>
+            <h3>
+              13.3 Why use LangGraph rather than only LangChain’s generic agent
+              loop
+            </h3>
+            <p>
+              LangChain’s high-level agent abstraction is useful for contained
+              P1/P2 tasks. LangGraph should remain the outer execution substrate
+              when exact topology, state, durable execution, interrupts,
+              subgraphs and deterministic routing matter. LangChain itself now
+              builds its high-level agent runtime on LangGraph, which reinforces
+              this layering.
+            </p>
+          </section>
+          <section id="migration">
+            <h2>14. Migration strategy from BPMN</h2>
+            <p>
+              The bank does not need a “big bang BPMN removal” program.
+              Migration should be capability-led and should preserve outcomes
+              while progressively moving control to state/policy/agent
+              abstractions.
+            </p>
+            <h3>14.1 Four stages</h3>
+            <table>
+              <tr>
+                <th>Stage</th>
+                <th>What changes</th>
+                <th>Risk</th>
+              </tr>
+              <tr>
+                <td><strong>1 · Agent inside BPMN</strong></td>
+                <td>
+                  Use bounded AI agents for document extraction/summarisation,
+                  invoked as workflow services.
+                </td>
+                <td>Low. Proves model gateway and evaluation.</td>
+              </tr>
+              <tr>
+                <td><strong>2 · Sub-process replacement</strong></td>
+                <td>
+                  Replace one complex BPMN sub-process with a LangGraph
+                  subgraph; BPMN remains parent.
+                </td>
+                <td>Moderate. Introduces durable graph operations.</td>
+              </tr>
+              <tr>
+                <td><strong>3 · Agentic case orchestrator</strong></td>
+                <td>
+                  LangGraph owns case state and obligations; existing BPMN
+                  processes become tools/legacy adapters.
+                </td>
+                <td>Strategic transition point.</td>
+              </tr>
+              <tr>
+                <td><strong>4 · BPMN as optional notation</strong></td>
+                <td>
+                  New complex processes use agent graphs by default; BPMN
+                  retained only where it is the simplest fit.
+                </td>
+                <td>Requires new architecture/engineering standards.</td>
+              </tr>
+            </table>
+            <h3>14.2 How to decompose an existing BPMN model</h3>
+            <ol>
+              <li>
+                Extract all data fields carried by process variables → define
+                canonical typed case state.
+              </li>
+              <li>
+                Extract all gateways and expressions → classify each as policy,
+                routing, authorization or error handling.
+              </li>
+              <li>
+                Move business eligibility/obligation logic into policy-as-code.
+              </li>
+              <li>
+                Turn service tasks into business capabilities/tools with
+                idempotency contracts.
+              </li>
+              <li>
+                Group cohesive tasks into specialist agents/subgraphs by
+                business objective.
+              </li>
+              <li>
+                Convert human tasks into named interrupt contracts with required
+                roles and reason codes.
+              </li>
+              <li>
+                Convert timers/errors into explicit runtime events and state
+                transitions.
+              </li>
+              <li>
+                Define completion invariants; prove old and new execution
+                against a golden historical case set.
+              </li>
+            </ol>
+            <div class="callout">
+              <strong>Migration criterion:</strong> do not compare diagrams
+              node-for-node. Compare business invariants, obligations, outcomes,
+              evidence and SLAs. An agentic graph may be structurally different
+              while being behaviorally equivalent — and much simpler.
+            </div>
+          </section>
+          <section id="decision">
+            <h2>15. Recommendation</h2>
+            <p>
+              <strong
+                >Adopt stateful agentic orchestration as the strategic
+                architecture for complex client, risk, compliance and servicing
+                processes.</strong
+              >
+              Use LangGraph as the explicit graph/runtime layer; LangChain and
+              frontier models as bounded intelligence components. Treat
+              deterministic agents as first-class agents and require control
+              decisions to remain outside LLM prompts unless explicitly approved
+              as model decisions.
+            </p>
+            <h3>Guardrails</h3>
+            <div class="grid2">
+              <div class="card">
+                <h4 class="prefer">Require</h4>
+                <p>
+                  Typed state, policy versioning, deterministic routing for
+                  controls, tool allow-lists, idempotency, evidence lineage,
+                  durable checkpoints, human entitlements, model gateway,
+                  evaluations, full observability.
+                </p>
+              </div>
+              <div class="card">
+                <h4 class="avoid">Prohibit by default</h4>
+                <p>
+                  General agent with broad APIs, direct database tools,
+                  model-controlled entitlements, prompt-only policies, unbounded
+                  loops, unvalidated free-text downstream payloads, silent model
+                  upgrades, hidden cross-region model calls.
+                </p>
+              </div>
+            </div>
+            <div class="callout green">
+              <strong>Final position:</strong> the choice is not “BPMN
+              determinism versus agentic probabilism.” A well-designed agentic
+              platform can be
+              <em>more deterministic where determinism is required</em>, while
+              adding probabilistic intelligence only where the business problem
+              demands it. That is the architecture that can credibly replace
+              BPMN for the next generation of banking processes.
+            </div>
+          </section>
+          <section id="appendix">
+            <h2>Appendix A — Decision matrix: should this node use an LLM?</h2>
+            <table>
+              <tr>
+                <th>Question</th>
+                <th>If YES</th>
+                <th>If NO</th>
+              </tr>
+              <tr>
+                <td>
+                  Can the requirement be expressed completely as explicit rules
+                  over trusted data?
+                </td>
+                <td>Use D0/D1, no LLM for the decision.</td>
+                <td>Continue.</td>
+              </tr>
+              <tr>
+                <td>
+                  Is the input unstructured language/image/document content?
+                </td>
+                <td>P1 may extract/classify into typed candidate facts.</td>
+                <td>Probably deterministic.</td>
+              </tr>
+              <tr>
+                <td>Would two competent humans reasonably disagree?</td>
+                <td>
+                  P1/P2 may assist, with confidence/evidence and review
+                  threshold.
+                </td>
+                <td>Prefer deterministic implementation.</td>
+              </tr>
+              <tr>
+                <td>
+                  Does the output directly create legal/financial exposure?
+                </td>
+                <td>
+                  Deterministic validation and/or human authorization is
+                  mandatory.
+                </td>
+                <td>Bounded autonomous action may be acceptable.</td>
+              </tr>
+              <tr>
+                <td>Can failure be detected automatically?</td>
+                <td>Model automation is easier to control.</td>
+                <td>Raise assurance level and human review.</td>
+              </tr>
+            </table>
+            <h2>Appendix B — Example state-transition validator</h2>
+            <pre><code>LEGAL_TRANSITIONS = {
+    "ACTIVE": {"WAITING_CLIENT","WAITING_HUMAN","REJECTED","COMPLETED"},
+    "WAITING_CLIENT": {"ACTIVE","REJECTED"},
+    "WAITING_HUMAN": {"ACTIVE","REJECTED"},
+    "REJECTED": set(),
+    "COMPLETED": set(),
+}
+
+def validate_transition(before: CaseState, after: CaseState):
+    if after["status"] not in LEGAL_TRANSITIONS[before["status"]]:
+        if after["status"] != before["status"]:
+            raise IllegalStateTransition()
+
+    if after["status"] == "COMPLETED":
+        blocking = [
+            x for x in after["obligations"].values()
+            if x["blocking"] and x["status"] != "PASS"
+        ]
+        if blocking:
+            raise InvariantViolation("Cannot complete with blocking obligations")
+
+        if not after.get("evidence_manifest_id"):
+            raise InvariantViolation("Completion requires evidence manifest")</code></pre>
+            <div class="code-explainer">
+              <div class="label">Explanation</div>
+              <ul>
+                <li>
+                  Legal lifecycle transitions are encoded explicitly and can be
+                  tested independently of individual agents.
+                </li>
+                <li>
+                  The validator rejects any illegal state transition even if a
+                  node or model proposes it.
+                </li>
+                <li>
+                  COMPLETED is impossible while a blocking obligation remains
+                  unresolved.
+                </li>
+                <li>
+                  An evidence manifest is mandatory before the case can
+                  complete.
+                </li>
+                <li>
+                  This validator acts as a final deterministic guardrail around
+                  all graph state writes.
+                </li>
+              </ul>
+            </div>
+            <h2>Appendix C — Architecture review questions</h2>
+            <ol>
+              <li>
+                Which decisions are legally/policy deterministic, and are any of
+                them currently hidden in prompts?
+              </li>
+              <li>
+                Can every authoritative state update identify its source
+                evidence?
+              </li>
+              <li>Can every tool call be replayed safely or deduplicated?</li>
+              <li>What exact authority does each agent identity possess?</li>
+              <li>
+                What is the maximum blast radius if a model behaves incorrectly?
+              </li>
+              <li>
+                Can a model/provider be replaced without redesigning the
+                business graph?
+              </li>
+              <li>
+                What happens to in-flight cases when policy version N+1 is
+                deployed?
+              </li>
+              <li>
+                Can the bank replay a historical case against graph/policy/model
+                versions?
+              </li>
+              <li>
+                Are human overrides measured and fed back into evaluation?
+              </li>
+              <li>
+                Can operations understand the case using business obligations
+                rather than runtime internals?
+              </li>
+            </ol>
+            <h2>Appendix D — Sources and technical references</h2>
+            <ul class="ref">
+              <li>
+                Object Management Group,
+                <em
+                  >Business Process Model and Notation (BPMN), Version 2.0.2</em
+                >. Formal specification and stated purpose as a standard
+                business-process notation.
+                <a href="https://www.omg.org/spec/BPMN/2.0.2/" target="_blank"
+                  >OMG BPMN 2.0.2</a
+                >.
+              </li>
+              <li>
+                LangChain, <em>LangGraph overview</em>. Documents durable
+                execution, human-in-the-loop and stateful graph primitives.
+                <a
+                  href="https://docs.langchain.com/oss/python/langgraph/overview"
+                  target="_blank"
+                  >LangGraph overview</a
+                >.
+              </li>
+              <li>
+                LangChain, <em>Interrupts</em>. Documents persisted state,
+                resume semantics and idempotency considerations around
+                interrupts.
+                <a
+                  href="https://docs.langchain.com/oss/python/langgraph/interrupts"
+                  target="_blank"
+                  >LangGraph interrupts</a
+                >.
+              </li>
+              <li>
+                LangChain, <em>Structured output</em>. Documents provider
+                strategy, tool strategy and schema validation.
+                <a
+                  href="https://docs.langchain.com/oss/python/langchain/structured-output"
+                  target="_blank"
+                  >LangChain structured output</a
+                >.
+              </li>
+              <li>
+                LangChain, <em>Agents</em>. Notes that LangChain’s high-level
+                agent runtime is graph-based and built using LangGraph.
+                <a
+                  href="https://docs.langchain.com/oss/python/langchain/agents"
+                  target="_blank"
+                  >LangChain agents</a
+                >.
+              </li>
+              <li>
+                OpenAI API documentation,
+                <em>Structured Outputs / function tools</em>. JSON-schema
+                structured response and strict tool schema support.
+                <a href="https://platform.openai.com/docs" target="_blank"
+                  >OpenAI developer documentation</a
+                >.
+              </li>
+              <li>
+                Anthropic documentation, <em>Tool use with Claude</em>. Tool
+                definitions use input schemas and the client executes
+                client-side tools.
+                <a
+                  href="https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview"
+                  target="_blank"
+                  >Anthropic tool use</a
+                >.
+              </li>
+              <li>
+                Federal Reserve, OCC and FDIC,
+                <em>Revised Guidance on Model Risk Management</em>, issued 17
+                April 2026; supersedes SR 11-7.
+                <a
+                  href="https://www.federalreserve.gov/supervisionreg/srletters/SR2602.htm"
+                  target="_blank"
+                  >SR 26-2</a
+                >.
+              </li>
+              <li>
+                NIST,
+                <em
+                  >Artificial Intelligence Risk Management Framework (AI RMF
+                  1.0)</em
+                >, with Govern, Map, Measure and Manage functions; NIST notes
+                the framework is being revised.
+                <a
+                  href="https://www.nist.gov/itl/ai-risk-management-framework"
+                  target="_blank"
+                  >NIST AI RMF</a
+                >.
+              </li>
+            </ul>
+          </section>
+        </div>
+      </main>
+    </div>
+    <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+  </body>
+</html>
