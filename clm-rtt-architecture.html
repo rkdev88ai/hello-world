@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CLM platform for Ready to Transact — target architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F7;--surface:#FFFFFF;--ink:#14233A;--muted:#5A6A7D;--line:#CCD6E1;
+  --pol:#6A3FA0;--pol-t:#F0E9F9;--orc:#0D7A78;--orc-t:#E0F2F1;--edp:#2762AE;--edp-t:#E3ECF8;--cdm:#A1601B;--cdm-t:#F7ECDE;--fn:#34475E;--fn-t:#E8EDF3;
+  --code:#0F1B2B;--codeink:#DCE6F2;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1622;--surface:#162130;--ink:#E5ECF4;--muted:#9AABBE;--line:#2B3A4D;
+  --pol:#BC9AE9;--pol-t:#251C38;--orc:#4CC2BD;--orc-t:#102E2D;--edp:#73A8EE;--edp-t:#14253C;--cdm:#E2A462;--cdm-t:#30231A;--fn:#A3B6CB;--fn-t:#1D2938;
+  --code:#0A111B;--codeink:#D5E1EE;}}
+:root[data-theme="dark"]{--bg:#0E1622;--surface:#162130;--ink:#E5ECF4;--muted:#9AABBE;--line:#2B3A4D;
+  --pol:#BC9AE9;--pol-t:#251C38;--orc:#4CC2BD;--orc-t:#102E2D;--edp:#73A8EE;--edp-t:#14253C;--cdm:#E2A462;--cdm-t:#30231A;--fn:#A3B6CB;--fn-t:#1D2938;--code:#0A111B;--codeink:#D5E1EE;}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--orc);outline-offset:2px}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1360px;margin:0 auto;padding:0 28px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding:36px 0;max-height:100vh;overflow:auto}
+nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+nav.toc li{counter-increment:t;margin:2px 0}
+nav.toc a{display:flex;gap:10px;text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 10px;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+nav.toc a::before{content:counter(t);font-variant-numeric:tabular-nums;color:var(--muted);min-width:14px}
+nav.toc a:hover{color:var(--ink);background:var(--surface)}
+nav.toc a.on{color:var(--ink);border-left-color:var(--ink);background:var(--surface);font-weight:600}
+nav.toc .k{font-size:12px;color:var(--muted);margin:22px 10px 8px}
+.dotk{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:5px 10px;color:var(--ink)}
+.dotk i{width:12px;height:12px;border-radius:3px;display:inline-block}
+main{padding:36px 0 80px;min-width:0}
+header.hero{padding:22px 0 30px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.hero h1{font-size:clamp(28px,3.6vw,44px);line-height:1.08;letter-spacing:-.015em;margin:0 0 14px;font-weight:700;max-width:22ch}
+.hero p.lede{font-size:17px;color:var(--muted);max-width:68ch;margin:0 0 22px}
+.vision{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;max-width:900px}
+.vision b{font-size:13px;color:var(--muted);font-weight:500}
+.vision q{font-size:18px;font-weight:600;quotes:none}
+.four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
+.four a{display:block;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:10px;padding:14px 16px}
+.four a strong{display:block;font-size:15px;margin-bottom:4px;color:var(--c)}
+.four a span{font-size:13px;color:var(--muted)}
+section{padding:46px 0 10px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{font-size:26px;letter-spacing:-.01em;margin:0 0 6px;display:flex;align-items:baseline;gap:14px}
+h2 .n{font-size:15px;color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+h2.pol{color:var(--pol)}h2.orc{color:var(--orc)}h2.edp{color:var(--edp)}h2.cdm{color:var(--cdm)}
+.sub-lede{color:var(--muted);margin:0 0 22px;max-width:75ch}
+h3{font-size:16.5px;margin:30px 0 10px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0 8px;overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:900px;height:auto}
+.cap{font-size:12.5px;color:var(--muted);margin:6px 2px 18px}
+ul.b{margin:0;padding-left:18px}
+ul.b li{margin:5px 0}
+ul.b li::marker{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.panel h4{margin:0 0 8px;font-size:14.5px}
+.panel.pol{border-left:4px solid var(--pol)}.panel.orc{border-left:4px solid var(--orc)}.panel.edp{border-left:4px solid var(--edp)}.panel.cdm{border-left:4px solid var(--cdm)}
+.rtt{background:var(--ink);color:var(--surface);border-radius:12px;padding:18px 22px;margin:22px 0 10px}
+.rtt h4{margin:0 0 10px;font-size:15px}
+.rtt ul{margin:0;padding-left:18px}.rtt li{margin:5px 0}
+.rtt li::marker{color:var(--surface)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:12.5px;color:var(--muted);background:var(--fn-t)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;color:var(--muted);width:34px}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px;margin:1px 2px 1px 0;border:1px solid}
+.tag.p{color:var(--pol);border-color:var(--pol);background:var(--pol-t)}.tag.o{color:var(--orc);border-color:var(--orc);background:var(--orc-t)}
+.tag.e{color:var(--edp);border-color:var(--edp);background:var(--edp-t)}.tag.d{color:var(--cdm);border-color:var(--cdm);background:var(--cdm-t)}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+pre .c{color:#7F93AB}pre .k{color:#C6A5F2}pre .s{color:#8FD3C9}
+.mx td{text-align:center;padding:8px 6px}
+.mx td:first-child,.mx th:first-child{text-align:left;padding-left:12px;white-space:nowrap}
+.mx th{text-align:center;font-size:11.5px}
+.cell{display:inline-block;width:22px;height:22px;border-radius:5px;vertical-align:middle}
+.cell.full{background:var(--orc)}.cell.var{background:var(--orc-t);border:2px solid var(--orc)}.cell.na{background:transparent;border:1px dashed var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--muted);margin:6px 2px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .cell{width:14px;height:14px;border-radius:3px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle}
+.dot.h{background:var(--ink)}.dot.m{background:transparent;border:2px solid var(--ink)}
+/* SVG */
+svg text{fill:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif}
+svg text.sub,svg .bls{fill:var(--muted)}
+svg .bl{font-weight:700}svg .blc{font-weight:700}
+svg .li{fill:var(--ink)}
+svg .t-orc{fill:var(--orc)}svg .t-pol{fill:var(--pol)}svg .t-edp{fill:var(--edp)}svg .t-cdm{fill:var(--cdm)}
+svg rect.bn{fill:var(--fn-t);stroke:none}
+svg rect.b-orc{fill:var(--orc-t);stroke:var(--orc);stroke-width:1.2}
+svg rect.b-pol{fill:var(--pol-t);stroke:var(--pol);stroke-width:1.2}
+svg rect.b-edp{fill:var(--edp-t);stroke:var(--edp);stroke-width:1.2}
+svg rect.b-edp2{fill:var(--edp-t);stroke:none}
+svg rect.b-cdm{fill:var(--cdm-t);stroke:var(--cdm);stroke-width:1.2}
+svg .c rect{fill:var(--surface);stroke:var(--line);stroke-width:1}
+svg .c-orc rect{stroke:var(--orc)}svg .c-pol rect{stroke:var(--pol)}svg .c-edp rect{stroke:var(--edp)}svg .c-cdm rect{stroke:var(--cdm)}svg .c-fn rect{stroke:var(--fn);stroke-opacity:.55}
+svg .c.strong rect{stroke-width:2}
+svg .ar{stroke:var(--muted);stroke-width:1.5}
+svg .ar-pol{stroke:var(--pol)}svg .ar-edp{stroke:var(--edp)}svg .ar-cdm{stroke:var(--cdm)}
+svg .ahd{fill:var(--muted)}
+svg .rtt circle{fill:var(--ink)} svg .rtt text{fill:var(--surface)}
+svg .hub circle{fill:var(--cdm)} svg .hub text{fill:var(--surface)}
+svg .spoke{stroke:var(--cdm);stroke-opacity:.45;stroke-width:1.2}
+svg .gate rect{fill:var(--fn-t);stroke:var(--ink);stroke-width:1.5}
+svg .z0{fill:var(--fn-t)}svg .z1{fill:var(--cdm-t);stroke:var(--cdm)}svg .z2{fill:var(--orc)}
+svg .zt{fill:var(--ink)}
+svg .bar rect{stroke:none}
+svg .seqb rect{fill:var(--fn-t);stroke:var(--line)}
+svg .orcb rect{fill:var(--orc-t);stroke:var(--orc)}
+svg .actb rect{fill:var(--orc)} svg .actb text{fill:var(--surface);font-weight:600}
+@media (max-width:1000px){.wrap{grid-template-columns:1fr;gap:0;padding:0 16px}nav.toc{display:none}.four{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+@media print{nav.toc{display:none}.wrap{grid-template-columns:1fr}.fig svg{min-width:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#overview">Architecture overview</a></li>
+    <li><a href="#journey">RTT journey flow</a></li>
+    <li><a href="#components">Journey capabilities</a></li>
+    <li><a href="#policy">Policy engine</a></li>
+    <li><a href="#orchestration">Orchestration</a></li>
+    <li><a href="#edp">External data platform</a></li>
+    <li><a href="#clientdata">Client data</a></li>
+    <li><a href="#rtt">How foundations deliver RTT</a></li>
+    <li><a href="#nfr">Cross-cutting concerns</a></li>
+    <li><a href="#decisions">Key decisions</a></li>
+  </ol>
+  <div class="k">Foundational capabilities</div>
+  <div class="dotk"><i style="background:var(--pol)"></i>Policy engine</div>
+  <div class="dotk"><i style="background:var(--orc)"></i>Orchestration</div>
+  <div class="dotk"><i style="background:var(--edp)"></i>External data</div>
+  <div class="dotk"><i style="background:var(--cdm)"></i>Client data</div>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Client Lifecycle Management platform for Ready to Transact</h1>
+  <p class="lede">Target architecture for onboarding, servicing and offboarding corporate and institutional clients across 50+ markets, built on four foundational capabilities.</p>
+  <div class="vision"><b>RTT vision</b><q>Onboard and service clients so that they are enabled to transact with the bank at the earliest.</q></div>
+  <div class="four">
+    <a href="#policy" style="--c:var(--pol)"><strong>Policy engine</strong><span>Policies become versioned OPA rules with full lineage</span></a>
+    <a href="#orchestration" style="--c:var(--orc)"><strong>Orchestration</strong><span>Segment-specific journeys, parallel by default, visible in real time</span></a>
+    <a href="#edp" style="--c:var(--edp)"><strong>External data</strong><span>Trusted sources, resolved to one entity ID, served by API</span></a>
+    <a href="#clientdata" style="--c:var(--cdm)"><strong>Client data</strong><span>JSON LEM and domain objects, cleanly separated from case data</span></a>
+  </div>
+</header>
+
+<section id="overview">
+  <h2><span class="n">1</span>Architecture overview</h2>
+  <p class="sub-lede">Layered view: channels on top, journey services in the middle, data and systems of execution below. Foundations are colour-coded.</p>
+  <div class="fig"><svg viewBox="0 0 1200 960" role="img" aria-label="Overall CLM architecture"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><rect class="bn" x="10" y="10" width="1180" height="70" rx="10"/><text class="bl" x="24" y="50" font-size="13" text-anchor="start">Channels</text><g class="c"><rect x="140" y="28" width="167" height="34" rx="6"/><text x="223.5" y="49.0" text-anchor="middle" font-size="11.5">Client portal</text></g><g class="c"><rect x="316" y="28" width="167" height="34" rx="6"/><text x="399.5" y="49.0" text-anchor="middle" font-size="11.5">RM &amp; Ops workbench</text></g><g class="c"><rect x="492" y="28" width="167" height="34" rx="6"/><text x="575.5" y="49.0" text-anchor="middle" font-size="11.5">Prospect intake (CRM)</text></g><g class="c"><rect x="668" y="28" width="167" height="34" rx="6"/><text x="751.5" y="49.0" text-anchor="middle" font-size="11.5">Partner / API channel</text></g><g class="c"><rect x="844" y="28" width="167" height="34" rx="6"/><text x="927.5" y="49.0" text-anchor="middle" font-size="11.5">Outreach hub</text></g><g class="c"><rect x="1020" y="28" width="167" height="34" rx="6"/><text x="1103.5" y="49.0" text-anchor="middle" font-size="11.5">Templated AO forms</text></g><rect class="bn" x="10" y="90" width="1180" height="52" rx="10"/><text class="bl" x="24" y="121" font-size="13" text-anchor="start">Access</text><g class="c"><rect x="140" y="99" width="344" height="34" rx="6"/><text x="312.0" y="120.0" text-anchor="middle" font-size="11.5">API gateway</text></g><g class="c"><rect x="493" y="99" width="344" height="34" rx="6"/><text x="665.0" y="120.0" text-anchor="middle" font-size="11.5">IAM &amp; entitlements</text></g><g class="c"><rect x="846" y="99" width="344" height="34" rx="6"/><text x="1018.0" y="120.0" text-anchor="middle" font-size="11.5">CLM micro-frontends</text></g><rect class="b-orc" x="10" y="152" width="1030" height="70" rx="10"/><text class="bl t-orc" x="24" y="192" font-size="13" text-anchor="start">Orchestration</text><g class="c c-orc"><rect x="140" y="170" width="171" height="34" rx="6"/><text x="225.5" y="191.0" text-anchor="middle" font-size="11.5">Segment journey templates</text></g><g class="c c-orc"><rect x="321" y="170" width="171" height="34" rx="6"/><text x="406.5" y="191.0" text-anchor="middle" font-size="11.5">Case &amp; task manager</text></g><g class="c c-orc"><rect x="502" y="170" width="171" height="34" rx="6"/><text x="587.5" y="191.0" text-anchor="middle" font-size="11.5">Durable workflow engine</text></g><g class="c c-orc"><rect x="683" y="170" width="171" height="34" rx="6"/><text x="768.5" y="191.0" text-anchor="middle" font-size="11.5">SLA &amp; escalation</text></g><g class="c c-orc"><rect x="864" y="170" width="171" height="34" rx="6"/><text x="949.5" y="191.0" text-anchor="middle" font-size="11.5">Journey 360 view</text></g><rect class="bn" x="10" y="232" width="1030" height="250" rx="10"/><text class="bl" x="24" y="262" font-size="13" text-anchor="start">CLM services</text><text class="bls" x="24" y="280" font-size="11" text-anchor="start">14 journey</text><text class="bls" x="24" y="295" font-size="11" text-anchor="start">capabilities</text><text class="blc" x="144" y="254" font-size="12" text-anchor="start">Know the client</text><g class="c c-fn"><rect x="140" y="264" width="216" height="29" rx="6"/><text x="248.0" y="282.5" text-anchor="middle" font-size="11.5">1  Intake</text></g><g class="c c-fn"><rect x="140" y="299" width="216" height="29" rx="6"/><text x="248.0" y="317.5" text-anchor="middle" font-size="11.5">2  Data enrichment</text></g><g class="c c-fn"><rect x="140" y="334" width="216" height="29" rx="6"/><text x="248.0" y="352.5" text-anchor="middle" font-size="11.5">3  Policy gap analysis</text></g><g class="c c-fn"><rect x="140" y="369" width="216" height="29" rx="6"/><text x="248.0" y="387.5" text-anchor="middle" font-size="11.5">4  Client outreach</text></g><text class="blc" x="370" y="254" font-size="12" text-anchor="start">Assess the client</text><g class="c c-fn"><rect x="366" y="264" width="216" height="29" rx="6"/><text x="474.0" y="282.5" text-anchor="middle" font-size="11.5">5  Tax validation</text></g><g class="c c-fn"><rect x="366" y="299" width="216" height="29" rx="6"/><text x="474.0" y="317.5" text-anchor="middle" font-size="11.5">6  Reg. classification (FM)</text></g><g class="c c-fn"><rect x="366" y="334" width="216" height="29" rx="6"/><text x="474.0" y="352.5" text-anchor="middle" font-size="11.5">7  UBO identification</text></g><g class="c c-fn"><rect x="366" y="369" width="216" height="29" rx="6"/><text x="474.0" y="387.5" text-anchor="middle" font-size="11.5">8  Client risk rating</text></g><g class="c c-fn"><rect x="366" y="404" width="216" height="29" rx="6"/><text x="474.0" y="422.5" text-anchor="middle" font-size="11.5">9  Sanctions &amp; PEP screening</text></g><g class="c c-fn"><rect x="366" y="439" width="216" height="29" rx="6"/><text x="474.0" y="457.5" text-anchor="middle" font-size="11.5">10 Enhanced due diligence</text></g><text class="blc" x="596" y="254" font-size="12" text-anchor="start">Enable to transact</text><g class="c c-fn"><rect x="592" y="264" width="216" height="29" rx="6"/><text x="700.0" y="282.5" text-anchor="middle" font-size="11.5">11 Product provisioning</text></g><g class="c c-fn"><rect x="592" y="299" width="216" height="29" rx="6"/><text x="700.0" y="317.5" text-anchor="middle" font-size="11.5">12 Limits &amp; facilities</text></g><g class="c c-fn"><rect x="592" y="334" width="216" height="29" rx="6"/><text x="700.0" y="352.5" text-anchor="middle" font-size="11.5">13 Settlement instructions</text></g><g class="c c-fn"><rect x="592" y="369" width="216" height="29" rx="6"/><text x="700.0" y="387.5" text-anchor="middle" font-size="11.5">AO form capture (IDP)</text></g><text class="blc" x="822" y="254" font-size="12" text-anchor="start">Maintain &amp; exit</text><g class="c c-fn"><rect x="818" y="264" width="216" height="29" rx="6"/><text x="926.0" y="282.5" text-anchor="middle" font-size="11.5">Event-driven review</text></g><g class="c c-fn"><rect x="818" y="299" width="216" height="29" rx="6"/><text x="926.0" y="317.5" text-anchor="middle" font-size="11.5">14a Restrict (market/product)</text></g><g class="c c-fn"><rect x="818" y="334" width="216" height="29" rx="6"/><text x="926.0" y="352.5" text-anchor="middle" font-size="11.5">14b Full offboarding</text></g><g class="c c-fn"><rect x="818" y="369" width="216" height="29" rx="6"/><text x="926.0" y="387.5" text-anchor="middle" font-size="11.5">Status sync to TP</text></g><rect class="b-cdm" x="10" y="492" width="1030" height="110" rx="10"/><text class="bl t-cdm" x="24" y="540" font-size="13" text-anchor="start">Client data</text><g class="c c-cdm"><rect x="140" y="505" width="190" height="84" rx="6" stroke-dasharray="5 3"/><text x="235" y="528" text-anchor="middle" font-size="12" font-weight="600">Case store</text><text class="sub" x="235" y="546" text-anchor="middle" font-size="10.5">journey-scoped working data</text><text class="sub" x="235" y="562" text-anchor="middle" font-size="10.5">evidence, tasks, decisions</text><text class="sub" x="235" y="578" text-anchor="middle" font-size="10.5">proposed changes</text></g><line class="ar" x1="332" y1="547" x2="343" y2="547" marker-end="url(#ah)"/><g class="c c-cdm strong"><rect x="345" y="505" width="155" height="84" rx="6"/><text x="422" y="534" text-anchor="middle" font-size="12.5" font-weight="700">Legal Entity</text><text x="422" y="550" text-anchor="middle" font-size="12.5" font-weight="700">Master (LEM)</text><text class="sub" x="422" y="570" text-anchor="middle" font-size="10.5">golden identity, JSON</text></g><g class="c c-cdm"><rect x="515" y="507" width="125" height="36" rx="6"/><text x="577.5" y="529.0" text-anchor="middle" font-size="11">Tax profile</text></g><g class="c c-cdm"><rect x="646" y="507" width="125" height="36" rx="6"/><text x="708.5" y="529.0" text-anchor="middle" font-size="11">Reg. classification</text></g><g class="c c-cdm"><rect x="777" y="507" width="125" height="36" rx="6"/><text x="839.5" y="529.0" text-anchor="middle" font-size="11">KYC &amp; risk profile</text></g><g class="c c-cdm"><rect x="908" y="507" width="125" height="36" rx="6"/><text x="970.5" y="529.0" text-anchor="middle" font-size="11">Ownership graph</text></g><g class="c c-cdm"><rect x="515" y="549" width="125" height="36" rx="6"/><text x="577.5" y="571.0" text-anchor="middle" font-size="11">Products &amp; accounts</text></g><g class="c c-cdm"><rect x="646" y="549" width="125" height="36" rx="6"/><text x="708.5" y="571.0" text-anchor="middle" font-size="11">Limits &amp; facilities</text></g><g class="c c-cdm"><rect x="777" y="549" width="125" height="36" rx="6"/><text x="839.5" y="571.0" text-anchor="middle" font-size="11">SSI</text></g><g class="c c-cdm"><rect x="908" y="549" width="125" height="36" rx="6"/><text x="970.5" y="571.0" text-anchor="middle" font-size="11">Signatories</text></g><rect class="b-pol" x="1050" y="152" width="140" height="450" rx="10"/><text class="bl t-pol" x="1120" y="176" font-size="13" text-anchor="middle">Policy engine</text><g class="c c-pol"><rect x="1060" y="188" width="120" height="44" rx="6"/><text x="1120.0" y="214.0" text-anchor="middle" font-size="11">Policy library</text></g><g class="c c-pol"><rect x="1060" y="246" width="120" height="44" rx="6"/><text x="1120.0" y="272.0" text-anchor="middle" font-size="11">Rule authoring</text></g><g class="c c-pol"><rect x="1060" y="304" width="120" height="44" rx="6"/><text x="1120.0" y="330.0" text-anchor="middle" font-size="11">Rego compile &amp; test</text></g><g class="c c-pol"><rect x="1060" y="362" width="120" height="44" rx="6"/><text x="1120.0" y="388.0" text-anchor="middle" font-size="11">Signed bundles</text></g><g class="c c-pol"><rect x="1060" y="420" width="120" height="44" rx="6"/><text x="1120.0" y="446.0" text-anchor="middle" font-size="11">Lineage &amp; audit</text></g><g class="c c-pol"><rect x="1060" y="478" width="120" height="44" rx="6"/><text x="1120.0" y="504.0" text-anchor="middle" font-size="11">OPA decision API</text></g><g class="c c-pol"><rect x="1060" y="536" width="120" height="44" rx="6"/><text x="1120.0" y="562.0" text-anchor="middle" font-size="11">Decision logs</text></g><path class="ar ar-pol" d="M1050,300 L1042,300" fill="none" marker-end="url(#ah)"/><text class="sub" x="1046" y="140" font-size="10" text-anchor="middle"></text><rect class="bn" x="10" y="612" width="1180" height="52" rx="10"/><text class="bl" x="24" y="643" font-size="13" text-anchor="start">Integration</text><g class="c"><rect x="140" y="621" width="255" height="34" rx="6"/><text x="267.5" y="642.0" text-anchor="middle" font-size="11.5">Event mesh (Kafka, CloudEvents)</text></g><g class="c"><rect x="403" y="621" width="255" height="34" rx="6"/><text x="530.5" y="642.0" text-anchor="middle" font-size="11.5">API layer (REST / gRPC)</text></g><g class="c"><rect x="666" y="621" width="255" height="34" rx="6"/><text x="793.5" y="642.0" text-anchor="middle" font-size="11.5">Outbox &amp; CDC</text></g><g class="c"><rect x="929" y="621" width="255" height="34" rx="6"/><text x="1056.5" y="642.0" text-anchor="middle" font-size="11.5">Schema registry (JSON Schema)</text></g><rect class="b-edp" x="10" y="674" width="650" height="140" rx="10"/><text class="bl t-edp" x="24" y="736" font-size="13" text-anchor="start">External</text><text class="bl t-edp" x="24" y="753" font-size="13" text-anchor="start">data platform</text><g class="c c-edp"><rect x="150" y="690" width="162" height="44" rx="6"/><text x="231.0" y="716.0" text-anchor="middle" font-size="11">Source connectors</text></g><g class="c c-edp"><rect x="320" y="690" width="162" height="44" rx="6"/><text x="401.0" y="716.0" text-anchor="middle" font-size="11">Raw &amp; canonical zones</text></g><g class="c c-edp"><rect x="490" y="690" width="162" height="44" rx="6"/><text x="571.0" y="716.0" text-anchor="middle" font-size="11">Entity resolution (Splink)</text></g><g class="c c-edp"><rect x="150" y="748" width="162" height="44" rx="6"/><text x="231.0" y="774.0" text-anchor="middle" font-size="11">ID crosswalk</text></g><g class="c c-edp"><rect x="320" y="748" width="162" height="44" rx="6"/><text x="401.0" y="774.0" text-anchor="middle" font-size="11">Entity data APIs</text></g><g class="c c-edp"><rect x="490" y="748" width="162" height="44" rx="6"/><text x="571.0" y="774.0" text-anchor="middle" font-size="11">Change monitoring</text></g><rect class="bn" x="670" y="674" width="255" height="140" rx="10"/><text class="blc" x="684" y="696" font-size="12" text-anchor="start">Specialist engines</text><text class="li" x="684" y="718" font-size="11" text-anchor="start">• Screening engine (sanctions, PEP, AM)</text><text class="li" x="684" y="737" font-size="11" text-anchor="start">• Client risk models</text><text class="li" x="684" y="756" font-size="11" text-anchor="start">• Tax engine (FATCA / CRS)</text><text class="li" x="684" y="775" font-size="11" text-anchor="start">• Credit decisioning</text><text class="li" x="684" y="794" font-size="11" text-anchor="start">• Document AI / IDP</text><rect class="bn" x="935" y="674" width="255" height="140" rx="10"/><text class="blc" x="949" y="696" font-size="12" text-anchor="start">Transaction processing systems</text><text class="li" x="949" y="716.0" font-size="11" text-anchor="start">• Cash management &amp; payments</text><text class="li" x="949" y="732.5" font-size="11" text-anchor="start">• Trade finance</text><text class="li" x="949" y="749.0" font-size="11" text-anchor="start">• FX, MM &amp; derivatives</text><text class="li" x="949" y="765.5" font-size="11" text-anchor="start">• Securities services &amp; custody</text><text class="li" x="949" y="782.0" font-size="11" text-anchor="start">• Lending / loan servicing</text><text class="li" x="949" y="798.5" font-size="11" text-anchor="start">• SWIFT &amp; SSI repository</text><rect class="b-edp2" x="10" y="824" width="1180" height="60" rx="10"/><text class="bl t-edp" x="24" y="858" font-size="13" text-anchor="start">Data sources</text><g class="c c-edp"><rect x="140" y="837" width="167" height="34" rx="6"/><text x="223.5" y="858.0" text-anchor="middle" font-size="11">Orbis (BvD)</text></g><g class="c c-edp"><rect x="316" y="837" width="167" height="34" rx="6"/><text x="399.5" y="858.0" text-anchor="middle" font-size="11">LSEG</text></g><g class="c c-edp"><rect x="492" y="837" width="167" height="34" rx="6"/><text x="575.5" y="858.0" text-anchor="middle" font-size="11">S&amp;P Global</text></g><g class="c c-edp"><rect x="668" y="837" width="167" height="34" rx="6"/><text x="751.5" y="858.0" text-anchor="middle" font-size="11">GLEIF LEI</text></g><g class="c c-edp"><rect x="844" y="837" width="167" height="34" rx="6"/><text x="927.5" y="858.0" text-anchor="middle" font-size="11">Country registries (50+)</text></g><g class="c c-edp"><rect x="1020" y="837" width="167" height="34" rx="6"/><text x="1103.5" y="858.0" text-anchor="middle" font-size="11">Regulatory &amp; sanction lists</text></g><rect class="bn" x="10" y="894" width="1180" height="58" rx="10"/><text class="bl" x="24" y="928" font-size="13" text-anchor="start">Cross-cutting</text><g class="c"><rect x="140" y="906" width="201" height="34" rx="6"/><text x="240.5" y="927.0" text-anchor="middle" font-size="11">Audit &amp; lineage</text></g><g class="c"><rect x="351" y="906" width="201" height="34" rx="6"/><text x="451.5" y="927.0" text-anchor="middle" font-size="11">Data residency (regional planes)</text></g><g class="c"><rect x="562" y="906" width="201" height="34" rx="6"/><text x="662.5" y="927.0" text-anchor="middle" font-size="11">Observability &amp; SLOs</text></g><g class="c"><rect x="773" y="906" width="201" height="34" rx="6"/><text x="873.5" y="927.0" text-anchor="middle" font-size="11">Security &amp; IAM</text></g><g class="c"><rect x="984" y="906" width="201" height="34" rx="6"/><text x="1084.5" y="927.0" text-anchor="middle" font-size="11">Model &amp; AI governance</text></g></svg></div>
+  <p class="cap">Figure 1. Logical architecture of the CLM platform. Numbers in CLM services refer to the 14 journey capabilities.</p>
+  <div class="grid3">
+    <div class="panel"><h4>Layers</h4><ul class="b">
+      <li><b>Channels</b>: every entry point (client, RM, ops, partner API, forms) lands on the same journey, never a side process.</li>
+      <li><b>Orchestration</b>: owns the journey; services own the work.</li>
+      <li><b>CLM services</b>: stateless domain microservices, one per capability, each a System of Record for its domain object.</li>
+      <li><b>Client data</b>: case store vs master stores, separated by a commit gate.</li>
+    </ul></div>
+    <div class="panel"><h4>Interaction patterns</h4><ul class="b">
+      <li>Commands: orchestrator to services over synchronous APIs.</li>
+      <li>Facts: services publish domain events via outbox to the event mesh.</li>
+      <li>Decisions: every service and the orchestrator ask the local OPA sidecar; no policy logic in code.</li>
+      <li>Reference data: services read entity data from EDP APIs, never directly from vendors.</li>
+    </ul></div>
+    <div class="panel"><h4>Design principles</h4><ul class="b">
+      <li>Ask the client only for what policy requires and EDP cannot supply.</li>
+      <li>Parallel by default; sequence only on true data dependency.</li>
+      <li>Provision early, activate on approval.</li>
+      <li>Every decision traceable to a policy clause and data source.</li>
+      <li>Regional data planes for residency; one logical platform.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="journey">
+  <h2><span class="n">2</span>RTT journey flow</h2>
+  <p class="sub-lede">The 14 capabilities arranged as three concurrent tracks. Dashed boxes are conditional stages.</p>
+  <div class="fig"><svg viewBox="0 0 1240 440" role="img" aria-label="RTT journey with parallel tracks"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><rect class="bn" x="10" y="20" width="1100" height="110" rx="10"/><text class="bl" x="24" y="80.0" font-size="13" text-anchor="start">Know</text><rect class="bn" x="10" y="140" width="1100" height="160" rx="10"/><text class="bl" x="24" y="225.0" font-size="13" text-anchor="start">Assess</text><rect class="bn" x="10" y="310" width="1100" height="110" rx="10"/><text class="bl" x="24" y="370.0" font-size="13" text-anchor="start">Enable</text><g class="c c-fn"><rect x="110" y="50" width="110" height="50" rx="6"/><text x="165.0" y="72.0" text-anchor="middle" font-size="12" font-weight="600">Intake</text><text class="sub" x="165.0" y="87.0" text-anchor="middle" font-size="10.5">step 1</text></g><line class="ar" x1="220" y1="75" x2="234" y2="75" marker-end="url(#ah)"/><g class="c c-fn"><rect x="235" y="50" width="110" height="50" rx="6"/><text x="290.0" y="72.0" text-anchor="middle" font-size="12" font-weight="600">Enrich</text><text class="sub" x="290.0" y="87.0" text-anchor="middle" font-size="10.5">step 2</text></g><line class="ar" x1="345" y1="75" x2="359" y2="75" marker-end="url(#ah)"/><g class="c c-fn"><rect x="360" y="50" width="110" height="50" rx="6"/><text x="415.0" y="72.0" text-anchor="middle" font-size="12" font-weight="600">Gap analysis</text><text class="sub" x="415.0" y="87.0" text-anchor="middle" font-size="10.5">step 3</text></g><line class="ar" x1="470" y1="75" x2="484" y2="75" marker-end="url(#ah)"/><g class="c c-fn"><rect x="485" y="50" width="110" height="50" rx="6"/><text x="540.0" y="72.0" text-anchor="middle" font-size="12" font-weight="600">Outreach</text><text class="sub" x="540.0" y="87.0" text-anchor="middle" font-size="10.5">step 4</text></g><path class="ar" d="M530,100 C530,122 405,122 405,103" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4"/><text class="bls" x="468" y="126" font-size="10" text-anchor="middle">loop until gaps closed</text><path class="ar" d="M590,75 L610,75 L610,150" fill="none" marker-end="url(#ah)"/><g class="c c-fn"><rect x="620" y="152" width="175" height="30" rx="6"/><text x="630" y="171" font-size="11.5">Tax validation</text><text class="sub" x="787" y="171" font-size="10" text-anchor="end">5</text></g><g class="c c-fn"><rect x="620" y="188" width="175" height="30" rx="6" stroke-dasharray="5 3"/><text x="630" y="207" font-size="11.5">Reg. class.</text><text class="sub" x="787" y="207" font-size="10" text-anchor="end">6  FM only</text></g><g class="c c-fn"><rect x="620" y="224" width="175" height="30" rx="6"/><text x="630" y="243" font-size="11.5">UBO identification</text><text class="sub" x="787" y="243" font-size="10" text-anchor="end">7</text></g><g class="c c-fn"><rect x="620" y="260" width="175" height="30" rx="6"/><text x="630" y="279" font-size="11.5">Sanctions &amp; PEP</text><text class="sub" x="787" y="279" font-size="10" text-anchor="end">9</text></g><text class="bls" x="700" y="145" font-size="10" text-anchor="middle">run in parallel</text><path class="ar" d="M795,240 L804,240 L804,212 L813,212" fill="none" marker-end="url(#ah)"/><g class="c c-fn"><rect x="815" y="190" width="105" height="46" rx="6"/><text x="867.5" y="210.0" text-anchor="middle" font-size="12" font-weight="600">Risk rating</text><text class="sub" x="867.5" y="225.0" text-anchor="middle" font-size="10.5">step 8</text></g><line class="ar" x1="920" y1="213" x2="935" y2="213" marker-end="url(#ah)"/><g class="c c-fn"><rect x="937" y="190" width="80" height="46" rx="6" stroke-dasharray="5 3"/><text x="977" y="210" text-anchor="middle" font-size="12" font-weight="600">EDD</text><text class="sub" x="977" y="225" text-anchor="middle" font-size="10">10  M / H only</text></g><line class="ar" x1="1017" y1="213" x2="1030" y2="213" marker-end="url(#ah)"/><g class="c c-fn"><rect x="1032" y="190" width="72" height="46" rx="6"/><text x="1068.0" y="210.0" text-anchor="middle" font-size="12" font-weight="600">KYC</text><text class="sub" x="1068.0" y="225.0" text-anchor="middle" font-size="10.5">approved</text></g><path class="ar" d="M378,100 L378,334 L478,334" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4"/><g class="c c-orc"><rect x="480" y="320" width="420" height="30" rx="6"/><text x="490" y="339" font-size="11.5" font-weight="600">11 Provisioning: accounts pre-staged (restricted)</text></g><g class="c c-orc"><rect x="620" y="360" width="135" height="30" rx="6"/><text x="687.5" y="379.0" text-anchor="middle" font-size="11">12 Limits &amp; facilities</text></g><g class="c c-orc"><rect x="765" y="360" width="135" height="30" rx="6"/><text x="832.5" y="379.0" text-anchor="middle" font-size="11">13 SSI set-up</text></g><path class="ar" d="M900,335 L1050,335 L1050,342" fill="none" marker-end="url(#ah)"/><path class="ar" d="M1068,236 L1068,342" fill="none" marker-end="url(#ah)"/><g class="c c-orc strong"><rect x="1000" y="344" width="104" height="46" rx="6"/><text x="1052.0" y="364.0" text-anchor="middle" font-size="12" font-weight="600">Activate</text><text class="sub" x="1052.0" y="379.0" text-anchor="middle" font-size="10.5">lift restriction</text></g><path class="ar" d="M1104,367 L1150,367 L1168,280" fill="none" marker-end="url(#ah)"/><g class="rtt"><circle cx="1180" cy="225" r="52"/><text x="1180" y="221" text-anchor="middle" font-size="15" font-weight="700">RTT</text><text x="1180" y="238" text-anchor="middle" font-size="9">ready to transact</text></g><text class="bls" x="1180" y="400" font-size="11" text-anchor="middle">14 Offboarding</text><text class="bls" x="1180" y="415" font-size="10" text-anchor="middle">separate lifecycle</text></svg></div>
+  <p class="cap">Figure 2. Target journey. Accounts are pre-staged once product scope is known and activated when KYC is approved.</p>
+  <div class="grid3">
+    <div class="panel"><h4>Know track</h4><ul class="b">
+      <li>Intake captures minimum identifiers only (name, country, reg. no. or LEI, products, booking entity).</li>
+      <li>EDP pre-fills the entity profile, ownership and officers.</li>
+      <li>OPA computes the delta: required data and docs minus what is already held.</li>
+      <li>One consolidated outreach request; repeat loops only for genuinely new gaps.</li>
+    </ul></div>
+    <div class="panel"><h4>Assess track</h4><ul class="b">
+      <li>Tax, regulatory classification, UBO and screening run in parallel.</li>
+      <li>Regulatory classification (MiFID, EMIR, Dodd-Frank etc.) triggered only for FM products.</li>
+      <li>Risk rating waits on UBO and screening outcomes (true dependency).</li>
+      <li>EDD inserted dynamically when the risk rating is medium or high.</li>
+    </ul></div>
+    <div class="panel"><h4>Enable track</h4><ul class="b">
+      <li>Accounts created in TP systems in a restricted state while KYC is in progress.</li>
+      <li>Limits and SSIs set up in parallel with assessment.</li>
+      <li>Activation is one orchestrated step that lifts all restrictions together.</li>
+      <li>Offboarding reverses the track: restrict, unwind, close, update status.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="components">
+  <h2><span class="n">3</span>Journey capabilities</h2>
+  <p class="sub-lede">What each CLM service does and which foundations it depends on.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Capability</th><th>Responsibilities</th><th>Key integrations</th><th>Foundations</th></tr></thead>
+    <tbody>
+<tr><td class="num">1</td><td><b>Intake</b></td><td>Capture prospect, products, booking entity; dedupe against existing clients; create case.</td><td>CRM, client portal</td><td><span class="tag o">O</span><span class="tag e">E</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">2</td><td><b>Data enrichment</b></td><td>Pull resolved entity, officers, ownership and filings; map to LEM draft with provenance.</td><td>EDP APIs</td><td><span class="tag e">E</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">3</td><td><b>Policy gap analysis</b></td><td>Evaluate data and document requirements for client type, jurisdiction, product; compute gaps.</td><td>OPA</td><td><span class="tag p">P</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">4</td><td><b>Client outreach</b></td><td>Consolidated requests, reminders, secure upload, e-sign, IDP extraction of responses.</td><td>Portal, email, e-sign, IDP</td><td><span class="tag o">O</span><span class="tag p">P</span></td></tr>
+<tr><td class="num">5</td><td><b>Tax validation</b></td><td>FATCA / CRS classification, self-cert validation, TIN format checks, W-8/W-9 handling.</td><td>Tax engine</td><td><span class="tag p">P</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">6</td><td><b>Regulatory classification</b></td><td>For FM products only: MiFID client category, EMIR / Dodd-Frank status, LEI validity.</td><td>GLEIF, reg. data</td><td><span class="tag p">P</span><span class="tag e">E</span></td></tr>
+<tr><td class="num">7</td><td><b>UBO identification</b></td><td>Build ownership and control graph, compute indirect holdings, flag thresholds per jurisdiction.</td><td>EDP, graph store</td><td><span class="tag e">E</span><span class="tag p">P</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">8</td><td><b>Client risk rating</b></td><td>Score using internal models (geography, industry, product, ownership, screening hits).</td><td>Risk model service</td><td><span class="tag p">P</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">9</td><td><b>Sanctions & PEP screening</b></td><td>Screen entity, related parties and UBOs; disposition alerts; set up ongoing screening.</td><td>Screening engine</td><td><span class="tag o">O</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">10</td><td><b>Enhanced due diligence</b></td><td>Source of wealth / funds, adverse media, site visits, senior approval for medium and high risk.</td><td>Adverse media, approvals</td><td><span class="tag p">P</span><span class="tag o">O</span></td></tr>
+<tr><td class="num">11</td><td><b>Product provisioning</b></td><td>Account set-up per product via TP APIs; AO form capture; pre-stage then activate.</td><td>TP adapters, IDP</td><td><span class="tag o">O</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">12</td><td><b>Limits & facilities</b></td><td>Create facilities and limits for borrowing products after credit approval.</td><td>Credit system</td><td><span class="tag o">O</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">13</td><td><b>Settlement instructions</b></td><td>Capture, validate (BIC, IBAN, callback) and distribute SSIs.</td><td>SSI repository, SWIFT</td><td><span class="tag o">O</span><span class="tag d">D</span></td></tr>
+<tr><td class="num">14</td><td><b>Offboarding</b></td><td>Partial restriction by market or product; full exit with position unwind, account closure, status update.</td><td>TP adapters, screening</td><td><span class="tag o">O</span><span class="tag p">P</span><span class="tag d">D</span></td></tr>
+    </tbody></table></div>
+  <div class="legend"><span><span class="tag p">P</span>Policy engine</span><span><span class="tag o">O</span>Orchestration</span><span><span class="tag e">E</span>External data</span><span><span class="tag d">D</span>Client data</span></div>
+</section>
+
+<section id="policy">
+  <h2 class="pol"><span class="n">4</span>Policy engine</h2>
+  <p class="sub-lede">Converts Group onboarding policy, country addenda and regulatory documents into versioned, testable OPA rules, with lineage from clause to decision.</p>
+  <h3>Policy-to-rule pipeline</h3>
+  <div class="fig"><svg viewBox="0 0 1200 150" role="img" aria-label="Policy to rule pipeline"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><g class="c c-pol"><rect x="4" y="20" width="130" height="80" rx="8"/><text x="69" y="46" text-anchor="middle" font-size="12" font-weight="700">Policy sources</text><text class="sub" x="69" y="66" text-anchor="middle" font-size="10.5">Group policy, country</text><text class="sub" x="69" y="81" text-anchor="middle" font-size="10.5">addenda, reg. docs</text></g><line class="ar ar-pol" x1="134" y1="60" x2="151" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="153" y="20" width="130" height="80" rx="8"/><text x="218" y="46" text-anchor="middle" font-size="12" font-weight="700">Clause extraction</text><text class="sub" x="218" y="66" text-anchor="middle" font-size="10.5">LLM-assisted,</text><text class="sub" x="218" y="81" text-anchor="middle" font-size="10.5">SME verified</text></g><line class="ar ar-pol" x1="283" y1="60" x2="300" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="302" y="20" width="130" height="80" rx="8"/><text x="367" y="46" text-anchor="middle" font-size="12" font-weight="700">Obligations</text><text class="sub" x="367" y="66" text-anchor="middle" font-size="10.5">canonical, atomic</text><text class="sub" x="367" y="81" text-anchor="middle" font-size="10.5">requirements</text></g><line class="ar ar-pol" x1="432" y1="60" x2="449" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="451" y="20" width="130" height="80" rx="8"/><text x="516" y="46" text-anchor="middle" font-size="12" font-weight="700">Rule modelling</text><text class="sub" x="516" y="66" text-anchor="middle" font-size="10.5">decision tables</text><text class="sub" x="516" y="81" text-anchor="middle" font-size="10.5">and rule DSL</text></g><line class="ar ar-pol" x1="581" y1="60" x2="598" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="600" y="20" width="130" height="80" rx="8"/><text x="665" y="46" text-anchor="middle" font-size="12" font-weight="700">Rego generation</text><text class="sub" x="665" y="66" text-anchor="middle" font-size="10.5">compiled Rego +</text><text class="sub" x="665" y="81" text-anchor="middle" font-size="10.5">opa test suites</text></g><line class="ar ar-pol" x1="730" y1="60" x2="747" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="749" y="20" width="130" height="80" rx="8"/><text x="814" y="46" text-anchor="middle" font-size="12" font-weight="700">Approve &amp; sign</text><text class="sub" x="814" y="66" text-anchor="middle" font-size="10.5">4-eyes, policy</text><text class="sub" x="814" y="81" text-anchor="middle" font-size="10.5">owner sign-off</text></g><line class="ar ar-pol" x1="879" y1="60" x2="896" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="898" y="20" width="130" height="80" rx="8"/><text x="963" y="46" text-anchor="middle" font-size="12" font-weight="700">Bundle registry</text><text class="sub" x="963" y="66" text-anchor="middle" font-size="10.5">semver, signed,</text><text class="sub" x="963" y="81" text-anchor="middle" font-size="10.5">effective-dated</text></g><line class="ar ar-pol" x1="1028" y1="60" x2="1045" y2="60" marker-end="url(#ah)"/><g class="c c-pol"><rect x="1047" y="20" width="130" height="80" rx="8"/><text x="1112" y="46" text-anchor="middle" font-size="12" font-weight="700">Distribute</text><text class="sub" x="1112" y="66" text-anchor="middle" font-size="10.5">bundle server to</text><text class="sub" x="1112" y="81" text-anchor="middle" font-size="10.5">OPA sidecars</text></g><path class="ar" d="M590,100 C590,135 330,135 330,104" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4"/><text class="bls" x="460" y="145" font-size="10" text-anchor="middle">test failures and SME rejections loop back</text></svg></div>
+  <div class="grid2">
+    <div class="panel pol"><h4>Components</h4><ul class="b">
+      <li><b>Policy library</b>: versioned source documents with clause-level IDs.</li>
+      <li><b>Obligation catalogue</b>: atomic, canonical requirements (one obligation, one testable statement).</li>
+      <li><b>Rule authoring</b>: decision tables for policy SMEs; Rego generated, not hand-written, for most rules.</li>
+      <li><b>Test harness</b>: <code>opa test</code> plus golden scenarios per client type and market.</li>
+      <li><b>Bundle registry</b>: signed, semver bundles with effective-from dates.</li>
+      <li><b>Distribution</b>: bundle server pushes to OPA sidecars beside each CLM service.</li>
+      <li><b>Decision logs</b>: every evaluation logged with input hash, bundle version and result.</li>
+    </ul></div>
+    <div class="panel pol"><h4>Decision services exposed</h4><ul class="b">
+      <li><code>journey/route</code>: stages applicable to client type, market, product.</li>
+      <li><code>kyc/requirements</code>: data and document requirements, with acceptable alternatives.</li>
+      <li><code>tax/obligations</code>, <code>reg/classification_required</code></li>
+      <li><code>ubo/threshold</code>: ownership threshold by jurisdiction.</li>
+      <li><code>risk/edd_trigger</code>, <code>review/frequency</code></li>
+      <li><code>product/eligibility</code>: can this client get this product here.</li>
+      <li><code>lifecycle/restrictions</code>: what to block on restrict or exit.</li>
+    </ul></div>
+  </div>
+  <h3>Lineage and versioning</h3>
+  <div class="fig"><svg viewBox="0 0 1200 250" role="img" aria-label="Policy lineage graph"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><g class="c c-pol"><rect x="10" y="30" width="215" height="56" rx="8"/><text x="22" y="53" font-size="12" font-weight="700">Group KYC policy v7.2</text><text class="sub" x="22" y="71" font-size="10.5">§4.3 Authority to act</text></g><g class="c c-pol"><rect x="10" y="140" width="215" height="56" rx="8"/><text x="22" y="163" font-size="12" font-weight="700">SG country addendum v3.1</text><text class="sub" x="22" y="181" font-size="10.5">§2.1 Board resolution</text></g><g class="c c-pol"><rect x="250" y="85" width="215" height="56" rx="8"/><text x="262" y="108" font-size="12" font-weight="700">Obligation OBL-0412</text><text class="sub" x="262" y="126" font-size="10.5">evidence of signing authority</text></g><g class="c c-pol"><rect x="490" y="85" width="215" height="56" rx="8"/><text x="502" y="108" font-size="12" font-weight="700">Rule r14</text><text class="sub" x="502" y="126" font-size="10.5">kyc.docs.authority_evidence</text></g><g class="c c-pol"><rect x="730" y="85" width="215" height="56" rx="8"/><text x="742" y="108" font-size="12" font-weight="700">Bundle 2026.10.2</text><text class="sub" x="742" y="126" font-size="10.5">effective 2026-10-15</text></g><g class="c c-pol"><rect x="970" y="85" width="215" height="56" rx="8"/><text x="982" y="108" font-size="12" font-weight="700">Decision log</text><text class="sub" x="982" y="126" font-size="10.5">case C-88213, &#x27;required&#x27;</text></g><path class="ar ar-pol" d="M225,58 C238,58 236,105 248,108" fill="none" marker-end="url(#ah)"/><path class="ar ar-pol" d="M225,168 C238,168 236,122 248,118" fill="none" marker-end="url(#ah)"/><line class="ar ar-pol" x1="465" y1="113" x2="488" y2="113" marker-end="url(#ah)"/><line class="ar ar-pol" x1="705" y1="113" x2="728" y2="113" marker-end="url(#ah)"/><line class="ar ar-pol" x1="945" y1="113" x2="968" y2="113" marker-end="url(#ah)"/><text class="bls" x="228" y="90" font-size="10" text-anchor="start">derives</text><text class="bls" x="476" y="78" font-size="10" text-anchor="middle">implements</text><text class="bls" x="716" y="78" font-size="10" text-anchor="middle">packaged in</text><text class="bls" x="956" y="78" font-size="10" text-anchor="middle">evaluated</text><g class="c c-pol"><rect x="490" y="180" width="455" height="52" rx="8" stroke-dasharray="5 3"/><text x="502" y="202" font-size="12" font-weight="700">Impact analysis on change (r13 to r14)</text><text class="sub" x="502" y="220" font-size="10.5">diff of rule outcomes replayed over open cases and active clients, before go-live</text></g><path class="ar ar-pol" d="M597,141 L597,178" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4"/></svg></div>
+  <p class="cap">Figure 3. Each decision traces back to the clause that caused it. Example values are illustrative.</p>
+  <div class="grid2">
+    <div class="panel pol"><h4>Versioning rules</h4><ul class="b">
+      <li>Bitemporal: <i>effective</i> date (when policy applies) separate from <i>published</i> date.</li>
+      <li>Open cases pin the bundle version they started on; policy decides whether to re-evaluate.</li>
+      <li>Country addenda layered on Group policy: stricter rule wins unless an approved waiver exists.</li>
+      <li>Every rule change carries its obligation ID; no orphan rules allowed (CI check).</li>
+    </ul></div>
+    <div class="panel pol"><h4>Sample rule (Rego)</h4>
+<pre><span class="k">package</span> kyc.docs
+
+<span class="c"># OBL-0412 | Group v7.2 §4.3 | SG addendum v3.1 §2.1</span>
+required[doc] {
+  input.client.type == <span class="s">"LOCAL_CORPORATE"</span>
+  input.booking.country == <span class="s">"SG"</span>
+  <span class="k">not</span> held(<span class="s">"BOARD_RESOLUTION"</span>)
+  doc := {<span class="s">"code"</span>: <span class="s">"BOARD_RESOLUTION"</span>,
+          <span class="s">"obligation"</span>: <span class="s">"OBL-0412"</span>}
+}
+
+held(code) {
+  some d in input.evidence
+  d.code == code; d.status == <span class="s">"VERIFIED"</span>
+}</pre></div>
+  </div>
+  <div class="rtt"><h4>How it accelerates RTT</h4><ul>
+    <li>Right first time: the full requirement list is known at intake, so the client is asked once.</li>
+    <li>Asks only for the gap: rules evaluate against data already held and EDP-sourced data.</li>
+    <li>Policy change without code change: new country rules go live as a bundle, in days not releases.</li>
+    <li>Impact analysis before go-live prevents surprise rework on in-flight cases.</li>
+    <li>Explainable decisions shorten QA, audit and regulator queries.</li>
+  </ul></div>
+</section>
+
+<section id="orchestration">
+  <h2 class="orc"><span class="n">5</span>Orchestration</h2>
+  <p class="sub-lede">A central journey orchestrator that composes segment-specific journeys at runtime, runs them durably across systems, and records every transition for real-time and point-in-time views.</p>
+  <div class="fig"><svg viewBox="0 0 1200 400" role="img" aria-label="Orchestration architecture"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><rect class="bn" x="10" y="20" width="200" height="280" rx="10"/><text class="blc" x="24" y="46" font-size="12.5" text-anchor="start">Triggers</text><g class="c"><rect x="22" y="60" width="176" height="30" rx="6"/><text x="110.0" y="79.0" text-anchor="middle" font-size="11">New prospect intake</text></g><g class="c"><rect x="22" y="98" width="176" height="30" rx="6"/><text x="110.0" y="117.0" text-anchor="middle" font-size="11">Client service request</text></g><g class="c"><rect x="22" y="136" width="176" height="30" rx="6"/><text x="110.0" y="155.0" text-anchor="middle" font-size="11">Event-driven review</text></g><g class="c"><rect x="22" y="174" width="176" height="30" rx="6"/><text x="110.0" y="193.0" text-anchor="middle" font-size="11">Policy bundle change</text></g><g class="c"><rect x="22" y="212" width="176" height="30" rx="6"/><text x="110.0" y="231.0" text-anchor="middle" font-size="11">External data change</text></g><g class="c"><rect x="22" y="250" width="176" height="30" rx="6"/><text x="110.0" y="269.0" text-anchor="middle" font-size="11">Offboarding request</text></g><line class="ar" x1="210" y1="160" x2="238" y2="160" marker-end="url(#ah)"/><g class="c c-orc strong"><rect x="240" y="40" width="250" height="240" rx="10"/></g><text class="blc t-orc" x="256" y="66" font-size="13" text-anchor="start">Journey composer</text><text class="li" x="256" y="94" font-size="11.5" text-anchor="start">1. Resolve client type &amp; booking entity</text><text class="li" x="256" y="130" font-size="11.5" text-anchor="start">2. Select segment journey template</text><text class="li" x="256" y="166" font-size="11.5" text-anchor="start">3. Ask OPA: required stages, data, docs</text><text class="li" x="256" y="202" font-size="11.5" text-anchor="start">4. Inflate tasks, owners and SLAs</text><text class="li" x="256" y="238" font-size="11.5" text-anchor="start">5. Re-plan on new facts (dynamic)</text><line class="ar" x1="490" y1="160" x2="518" y2="160" marker-end="url(#ah)"/><g class="c c-orc strong"><rect x="520" y="40" width="270" height="240" rx="10"/></g><text class="blc t-orc" x="536" y="66" font-size="13" text-anchor="start">Durable workflow engine</text><text class="li" x="536" y="94" font-size="11.5" text-anchor="start">• Parallel branches &amp; joins</text><text class="li" x="536" y="130" font-size="11.5" text-anchor="start">• Human tasks + system tasks</text><text class="li" x="536" y="166" font-size="11.5" text-anchor="start">• Timers, reminders, SLA breach</text><text class="li" x="536" y="202" font-size="11.5" text-anchor="start">• Sagas with compensation</text><text class="li" x="536" y="238" font-size="11.5" text-anchor="start">• Idempotent, replayable steps</text><line class="ar" x1="790" y1="160" x2="818" y2="160" marker-end="url(#ah)"/><rect class="bn" x="820" y="20" width="370" height="280" rx="10"/><text class="blc" x="836" y="46" font-size="12.5" text-anchor="start">Workers &amp; adapters</text><g class="c"><rect x="836" y="60" width="338" height="30" rx="6"/><text x="1005.0" y="79.0" text-anchor="middle" font-size="11">CLM services (1 to 14)</text></g><g class="c"><rect x="836" y="98" width="338" height="30" rx="6"/><text x="1005.0" y="117.0" text-anchor="middle" font-size="11">EDP entity APIs</text></g><g class="c"><rect x="836" y="136" width="338" height="30" rx="6"/><text x="1005.0" y="155.0" text-anchor="middle" font-size="11">Screening / risk / tax engines</text></g><g class="c"><rect x="836" y="174" width="338" height="30" rx="6"/><text x="1005.0" y="193.0" text-anchor="middle" font-size="11">TP system adapters (account APIs)</text></g><g class="c"><rect x="836" y="212" width="338" height="30" rx="6"/><text x="1005.0" y="231.0" text-anchor="middle" font-size="11">Outreach hub &amp; e-sign</text></g><g class="c"><rect x="836" y="250" width="338" height="30" rx="6"/><text x="1005.0" y="269.0" text-anchor="middle" font-size="11">Ops work queues</text></g><path class="ar" d="M655,280 L655,318" fill="none" marker-end="url(#ah)"/><g class="c c-orc"><rect x="420" y="320" width="470" height="40" rx="8"/><text x="655" y="345" text-anchor="middle" font-size="12" font-weight="600">Journey event store (append-only, every state transition)</text></g><path class="ar" d="M890,340 L930,340" fill="none" marker-end="url(#ah)"/><g class="c c-orc"><rect x="932" y="318" width="120" height="44" rx="6"/><text x="992.0" y="337.0" text-anchor="middle" font-size="11.5" font-weight="600">Journey 360</text><text class="sub" x="992.0" y="352.0" text-anchor="middle" font-size="10.0">live projection</text></g><g class="c c-orc"><rect x="1060" y="318" width="130" height="44" rx="6"/><text x="1125.0" y="337.0" text-anchor="middle" font-size="11.5" font-weight="600">Point-in-time</text><text class="sub" x="1125.0" y="352.0" text-anchor="middle" font-size="10.0">replay to any t</text></g><path class="ar" d="M420,340 L360,340" fill="none" marker-end="url(#ah)"/><g class="c c-orc"><rect x="220" y="318" width="138" height="44" rx="6"/><text x="289.0" y="337.0" text-anchor="middle" font-size="11" font-weight="600">SLA &amp; flow analytics</text><text class="sub" x="289.0" y="352.0" text-anchor="middle" font-size="9.5">bottleneck mining</text></g></svg></div>
+  <p class="cap">Figure 4. Orchestrator components. The engine can be BPMN-based (e.g. Camunda 8) or code-first durable execution (e.g. Temporal).</p>
+  <h3>Journey templates by client segment</h3>
+  <div class="tw"><table class="mx">
+    <thead><tr><th>Stage</th><th>Local corporate</th><th>MNC subsidiary</th><th>Fund / investment manager</th><th>Correspondent bank</th><th>Broker-dealer / FI</th><th>Variation driver</th></tr></thead>
+    <tbody>
+<tr><td>Intake & enrich</td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell full"></span></td><td style="text-align:left">Parent reliance; fund-level vs manager-level onboarding</td></tr>
+<tr><td>Tax validation</td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell full"></span></td><td style="text-align:left">Fund GIIN / sponsored entity; FI status</td></tr>
+<tr><td>Reg. classification</td><td><span class="cell na"></span></td><td><span class="cell var"></span></td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td><span class="cell full"></span></td><td style="text-align:left">Only if FM products offered</td></tr>
+<tr><td>UBO</td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td style="text-align:left">Listed / regulated exemptions; fund controllers</td></tr>
+<tr><td>Correspondent due diligence</td><td><span class="cell na"></span></td><td><span class="cell na"></span></td><td><span class="cell na"></span></td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td style="text-align:left">Wolfsberg CBDDQ, nested relationships, shell bank check</td></tr>
+<tr><td>Screening & risk</td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td style="text-align:left">Common, parameters vary</td></tr>
+<tr><td>Provisioning</td><td><span class="cell full"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td style="text-align:left">Bulk fund accounts; vostro / nostro; custody</td></tr>
+<tr><td>Limits & SSI</td><td><span class="cell var"></span></td><td><span class="cell var"></span></td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td><span class="cell full"></span></td><td style="text-align:left">Borrowing products; FM settlement</td></tr>
+    </tbody></table></div>
+  <div class="legend"><span><span class="cell full"></span>Standard stage</span><span><span class="cell var"></span>Segment variant</span><span><span class="cell na"></span>Not applicable by default</span></div>
+  <div class="grid3">
+    <div class="panel orc"><h4>Journey composition</h4><ul class="b">
+      <li>Templates are assembled from reusable stage blocks, not copied flows.</li>
+      <li>Template chosen by client type; tasks inflated by OPA for market and product.</li>
+      <li>Re-planning: a new fact (e.g. high risk) adds stages to a running journey.</li>
+      <li>Templates are versioned and deployed independently of services.</li>
+    </ul></div>
+    <div class="panel orc"><h4>Execution</h4><ul class="b">
+      <li>Durable state survives restarts; every step idempotent.</li>
+      <li>Provisioning as a saga: per-TP steps with retry, compensation or parked ops task.</li>
+      <li>Human tasks routed to work queues by skill, market and SLA.</li>
+      <li>Correlation: one journey ID across all systems and events.</li>
+    </ul></div>
+    <div class="panel orc"><h4>Journey 360</h4><ul class="b">
+      <li>Live: stage, owner, blockers, SLA clock, next action, for RM and client.</li>
+      <li>Point-in-time: replay the event store to any timestamp for audit or dispute.</li>
+      <li>Portfolio view: all journeys by segment, market, stage, ageing.</li>
+      <li>Process mining on events to find bottlenecks.</li>
+    </ul></div>
+  </div>
+  <div class="rtt"><h4>How it accelerates RTT</h4><ul>
+    <li>Parallel tracks replace sequential hand-offs; elapsed time follows the critical path only.</li>
+    <li>Pre-provision and activate pattern removes account set-up from the critical path.</li>
+    <li>Segment templates avoid over-processing simple clients and under-processing complex ones.</li>
+    <li>Real-time visibility removes chasing and status calls; RMs and clients see the same truth.</li>
+    <li>SLA timers and escalation stop cases stalling silently.</li>
+  </ul></div>
+</section>
+
+<section id="edp">
+  <h2 class="edp"><span class="n">6</span>External data platform</h2>
+  <p class="sub-lede">One governed gateway to global data vendors and 50+ country registries, resolving every external record to the bank's entity ID and serving it to CLM through APIs.</p>
+  <div class="fig"><svg viewBox="0 0 1200 270" role="img" aria-label="External data platform pipeline"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><rect class="b-edp2" x="10" y="10" width="190" height="250" rx="10"/><text class="blc t-edp" x="24" y="34" font-size="12.5" text-anchor="start">Sources</text><g class="c c-edp"><rect x="22" y="46" width="166" height="28" rx="6"/><text x="105.0" y="64.0" text-anchor="middle" font-size="11">Orbis (BvD)</text></g><g class="c c-edp"><rect x="22" y="80" width="166" height="28" rx="6"/><text x="105.0" y="98.0" text-anchor="middle" font-size="11">LSEG</text></g><g class="c c-edp"><rect x="22" y="114" width="166" height="28" rx="6"/><text x="105.0" y="132.0" text-anchor="middle" font-size="11">S&amp;P Global</text></g><g class="c c-edp"><rect x="22" y="148" width="166" height="28" rx="6"/><text x="105.0" y="166.0" text-anchor="middle" font-size="11">GLEIF LEI</text></g><g class="c c-edp"><rect x="22" y="182" width="166" height="28" rx="6"/><text x="105.0" y="200.0" text-anchor="middle" font-size="11">Registries (50+)</text></g><g class="c c-edp"><rect x="22" y="216" width="166" height="28" rx="6"/><text x="105.0" y="234.0" text-anchor="middle" font-size="11">Reg. &amp; sanction lists</text></g><g class="c c-edp"><rect x="220" y="80" width="145" height="96" rx="8"/><text x="292" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Connect</text><text class="sub" x="292" y="132" text-anchor="middle" font-size="10.5">API, bulk, SFTP;</text><text class="sub" x="292" y="148" text-anchor="middle" font-size="10.5">licence &amp; quota aware</text></g><line class="ar ar-edp" x1="200" y1="128" x2="218" y2="128" marker-end="url(#ah)"/><g class="c c-edp"><rect x="383" y="80" width="145" height="96" rx="8"/><text x="455" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Land</text><text class="sub" x="455" y="132" text-anchor="middle" font-size="10.5">raw, immutable,</text><text class="sub" x="455" y="148" text-anchor="middle" font-size="10.5">source-stamped</text></g><line class="ar ar-edp" x1="365" y1="128" x2="381" y2="128" marker-end="url(#ah)"/><g class="c c-edp"><rect x="546" y="80" width="145" height="96" rx="8"/><text x="618" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Standardise</text><text class="sub" x="618" y="132" text-anchor="middle" font-size="10.5">canonical entity</text><text class="sub" x="618" y="148" text-anchor="middle" font-size="10.5">model, ISO codes</text></g><line class="ar ar-edp" x1="528" y1="128" x2="544" y2="128" marker-end="url(#ah)"/><g class="c c-edp"><rect x="709" y="80" width="145" height="96" rx="8"/><text x="781" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Resolve</text><text class="sub" x="781" y="132" text-anchor="middle" font-size="10.5">Splink matching,</text><text class="sub" x="781" y="148" text-anchor="middle" font-size="10.5">clerical review</text></g><line class="ar ar-edp" x1="691" y1="128" x2="707" y2="128" marker-end="url(#ah)"/><g class="c c-edp"><rect x="872" y="80" width="145" height="96" rx="8"/><text x="944" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Crosswalk</text><text class="sub" x="944" y="132" text-anchor="middle" font-size="10.5">CLM ID to BvD, PermID,</text><text class="sub" x="944" y="148" text-anchor="middle" font-size="10.5">LEI, registry no.</text></g><line class="ar ar-edp" x1="854" y1="128" x2="870" y2="128" marker-end="url(#ah)"/><g class="c c-edp"><rect x="1035" y="80" width="145" height="96" rx="8"/><text x="1107" y="110" text-anchor="middle" font-size="12.5" font-weight="700">Serve</text><text class="sub" x="1107" y="132" text-anchor="middle" font-size="10.5">entity APIs + change</text><text class="sub" x="1107" y="148" text-anchor="middle" font-size="10.5">events, cached</text></g><line class="ar ar-edp" x1="1017" y1="128" x2="1033" y2="128" marker-end="url(#ah)"/><text class="bls" x="781" y="198" font-size="10" text-anchor="middle">auto-link, review or new</text><text class="bls" x="700" y="240" font-size="11" text-anchor="middle">Governance: source precedence by attribute and market, data licence entitlements, provenance on every field</text></svg></div>
+  <p class="cap">Figure 5. EDP pipeline from source to API.</p>
+  <h3>Name and ID resolution with Splink</h3>
+  <div class="fig"><svg viewBox="0 0 1200 220" role="img" aria-label="Splink entity resolution"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><g class="c c-edp"><rect x="10" y="20" width="180" height="80" rx="8"/><text x="100" y="46" text-anchor="middle" font-size="12.5" font-weight="700">Blocking</text><text class="sub" x="100" y="66" text-anchor="middle" font-size="10.5">country + name tokens,</text><text class="sub" x="100" y="81" text-anchor="middle" font-size="10.5">registry no. prefix</text></g><line class="ar ar-edp" x1="190" y1="60" x2="208" y2="60" marker-end="url(#ah)"/><g class="c c-edp"><rect x="210" y="20" width="180" height="80" rx="8"/><text x="300" y="46" text-anchor="middle" font-size="12.5" font-weight="700">Compare</text><text class="sub" x="300" y="66" text-anchor="middle" font-size="10.5">Jaro-Winkler name, exact</text><text class="sub" x="300" y="81" text-anchor="middle" font-size="10.5">reg. no., address, dates</text></g><line class="ar ar-edp" x1="390" y1="60" x2="408" y2="60" marker-end="url(#ah)"/><g class="c c-edp"><rect x="410" y="20" width="180" height="80" rx="8"/><text x="500" y="46" text-anchor="middle" font-size="12.5" font-weight="700">Estimate</text><text class="sub" x="500" y="66" text-anchor="middle" font-size="10.5">EM training of m / u</text><text class="sub" x="500" y="81" text-anchor="middle" font-size="10.5">per comparison level</text></g><line class="ar ar-edp" x1="590" y1="60" x2="608" y2="60" marker-end="url(#ah)"/><g class="c c-edp"><rect x="610" y="20" width="180" height="80" rx="8"/><text x="700" y="46" text-anchor="middle" font-size="12.5" font-weight="700">Score</text><text class="sub" x="700" y="66" text-anchor="middle" font-size="10.5">match weight to</text><text class="sub" x="700" y="81" text-anchor="middle" font-size="10.5">match probability</text></g><line class="ar ar-edp" x1="790" y1="60" x2="815" y2="60" marker-end="url(#ah)"/><text class="blc" x="820" y="30" font-size="12" text-anchor="start">Decision bands (illustrative thresholds)</text><rect class="z0" x="820" y="45" width="259.0" height="30"/><rect class="z1" x="1079.0" y="45" width="92.5" height="30"/><rect class="z2" x="1171.5" y="45" width="18.5" height="30"/><text class="zt" x="949.5" y="65" font-size="10.5" text-anchor="middle">no match, create candidate</text><text class="zt" x="1125.25" y="65" font-size="10.5" text-anchor="middle">clerical review</text><text class="bls" x="820" y="92" font-size="10" text-anchor="middle">0</text><text class="bls" x="1079.0" y="92" font-size="10" text-anchor="middle">0.70</text><text class="bls" x="1171.5" y="92" font-size="10" text-anchor="middle">0.95</text><text class="bls" x="1190" y="92" font-size="10" text-anchor="middle">1</text><text class="bls" x="1190" y="112" font-size="10" text-anchor="end">auto-link at 0.95 or above</text><path class="ar ar-edp" d="M1000,120 C1000,185 400,185 380,108" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4"/><text class="bls" x="690" y="200" font-size="10.5" text-anchor="middle">reviewer decisions become labelled pairs, used to tune thresholds and comparison levels</text></svg></div>
+  <p class="cap">Figure 6. Probabilistic matching (Fellegi-Sunter) with a human review band. Thresholds tuned per market.</p>
+  <div class="grid2">
+    <div class="panel edp"><h4>Components</h4><ul class="b">
+      <li><b>Connector framework</b>: pluggable adapters per source; rate limits, cost and licence tracking.</li>
+      <li><b>Raw zone</b>: immutable payloads, kept for evidence and replay.</li>
+      <li><b>Canonical entity model</b>: identifiers, names (incl. transliterations), addresses, officers, shareholders, filings, status.</li>
+      <li><b>Entity resolution</b>: Splink on Spark for batch, DuckDB for on-demand single-entity matches.</li>
+      <li><b>ID crosswalk</b>: LE ID to BvD ID, LSEG PermID, S&P ID, LEI, registry numbers, with confidence and method.</li>
+      <li><b>Monitoring</b>: subscribes to source changes; emits events for event-driven review.</li>
+    </ul></div>
+    <div class="panel edp"><h4>Source precedence (example)</h4>
+      <div class="tw" style="margin:4px 0 0"><table>
+        <thead><tr><th>Attribute</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead>
+        <tbody>
+          <tr><td>Legal name, reg. no.</td><td>Country registry</td><td>GLEIF</td><td>Orbis</td></tr>
+          <tr><td>LEI & relationships</td><td>GLEIF</td><td>LSEG</td><td>Orbis</td></tr>
+          <tr><td>Shareholders</td><td>Registry</td><td>Orbis</td><td>S&P</td></tr>
+          <tr><td>Industry codes</td><td>Registry</td><td>S&P</td><td>LSEG</td></tr>
+          <tr><td>Listing / regulated</td><td>LSEG</td><td>S&P</td><td>Regulator list</td></tr>
+        </tbody></table></div>
+      <ul class="b" style="margin-top:10px"><li>Precedence configurable by market; conflicts surfaced, not silently overwritten.</li></ul>
+    </div>
+  </div>
+  <div class="grid3" style="margin-top:16px">
+    <div class="panel edp"><h4>APIs to CLM</h4><ul class="b">
+      <li><code>GET /entities/{leId}</code> golden view with field provenance</li>
+      <li><code>POST /resolve</code> name + attributes to candidate matches</li>
+      <li><code>GET /entities/{leId}/ownership</code> graph</li>
+      <li>Events: <code>EntityChanged</code>, <code>OwnershipChanged</code></li>
+    </ul></div>
+    <div class="panel edp"><h4>Governance</h4><ul class="b">
+      <li>Licence entitlements enforced per consuming use case.</li>
+      <li>Data stays in-region where registry terms or local law require.</li>
+      <li>Source quality scorecards per market.</li>
+    </ul></div>
+    <div class="panel edp"><h4>Operating model</h4><ul class="b">
+      <li>Central team owns connectors and resolution models.</li>
+      <li>Country teams own registry mappings and precedence.</li>
+      <li>New registry onboarded as configuration plus one adapter.</li>
+    </ul></div>
+  </div>
+  <div class="rtt"><h4>How it accelerates RTT</h4><ul>
+    <li>Pre-fill: most entity data arrives before the client is contacted, shrinking outreach.</li>
+    <li>Registry-sourced data is accepted as evidence where policy allows, removing document requests.</li>
+    <li>Reliable ID resolution prevents duplicate clients and repeated KYC across businesses.</li>
+    <li>Ownership chains from vendors give UBO analysis a head start.</li>
+    <li>Change events trigger targeted refresh instead of full periodic reviews.</li>
+  </ul></div>
+</section>
+
+<section id="clientdata">
+  <h2 class="cdm"><span class="n">7</span>Client data</h2>
+  <p class="sub-lede">Legal Entity Master plus domain data objects, stored as versioned JSON documents in their System of Record, with case data held separately until committed.</p>
+  <div class="fig"><svg viewBox="0 0 1200 545" role="img" aria-label="Case data versus master data"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahd"/></marker></defs><rect class="b-cdm" x="10" y="20" width="350" height="500" rx="12" stroke-dasharray="7 5"/><text class="blc t-cdm" x="28" y="48" font-size="13.5" text-anchor="start">Case data (CLM case store)</text><text class="bls" x="28" y="66" font-size="11" text-anchor="start">working copy, scoped to one journey</text><g class="c c-cdm"><rect x="28" y="82" width="314" height="52" rx="6"/><text x="185.0" y="105.0" text-anchor="middle" font-size="12" font-weight="600">Case header</text><text class="sub" x="185.0" y="120.0" text-anchor="middle" font-size="10.5">case id, journey type, status, SLA</text></g><g class="c c-cdm"><rect x="28" y="143" width="314" height="52" rx="6"/><text x="185.0" y="166.0" text-anchor="middle" font-size="12" font-weight="600">Draft entity snapshot</text><text class="sub" x="185.0" y="181.0" text-anchor="middle" font-size="10.5">proposed changes vs master version</text></g><g class="c c-cdm"><rect x="28" y="204" width="314" height="52" rx="6"/><text x="185.0" y="227.0" text-anchor="middle" font-size="12" font-weight="600">Requirement checklist</text><text class="sub" x="185.0" y="242.0" text-anchor="middle" font-size="10.5">OPA output, bundle version pinned</text></g><g class="c c-cdm"><rect x="28" y="265" width="314" height="52" rx="6"/><text x="185.0" y="288.0" text-anchor="middle" font-size="12" font-weight="600">Evidence &amp; documents</text><text class="sub" x="185.0" y="303.0" text-anchor="middle" font-size="10.5">doc refs, IDP extractions, sources</text></g><g class="c c-cdm"><rect x="28" y="326" width="314" height="52" rx="6"/><text x="185.0" y="349.0" text-anchor="middle" font-size="12" font-weight="600">Tasks &amp; outreach</text><text class="sub" x="185.0" y="364.0" text-anchor="middle" font-size="10.5">owners, requests, client responses</text></g><g class="c c-cdm"><rect x="28" y="387" width="314" height="52" rx="6"/><text x="185.0" y="410.0" text-anchor="middle" font-size="12" font-weight="600">Decisions &amp; approvals</text><text class="sub" x="185.0" y="425.0" text-anchor="middle" font-size="10.5">risk, EDD, sign-offs, rationale</text></g><g class="c c-cdm"><rect x="28" y="448" width="314" height="52" rx="6"/><text x="185.0" y="471.0" text-anchor="middle" font-size="12" font-weight="600">Audit trail</text><text class="sub" x="185.0" y="486.0" text-anchor="middle" font-size="10.5">who, what, when, why</text></g><g class="gate"><rect x="385" y="140" width="110" height="260" rx="10"/></g><text class="blc" x="440" y="166" font-size="12.5" text-anchor="middle">Commit gate</text><g class="c"><rect x="393" y="180" width="94" height="40" rx="6"/><text x="440.0" y="204.0" text-anchor="middle" font-size="10.5">JSON Schema</text></g><g class="c"><rect x="393" y="232" width="94" height="40" rx="6"/><text x="440.0" y="256.0" text-anchor="middle" font-size="10.5">OPA checks</text></g><g class="c"><rect x="393" y="284" width="94" height="40" rx="6"/><text x="440.0" y="308.0" text-anchor="middle" font-size="10.5">Approval</text></g><g class="c"><rect x="393" y="336" width="94" height="40" rx="6"/><text x="440.0" y="360.0" text-anchor="middle" font-size="10.5">Version + publish</text></g><line class="ar ar-cdm" x1="362" y1="270" x2="383" y2="270" marker-end="url(#ah)"/><line class="ar ar-cdm" x1="495" y1="270" x2="600" y2="270" marker-end="url(#ah)"/><text class="bls" x="548" y="260" font-size="10" text-anchor="middle">outbox event</text><line class="spoke" x1="880" y1="270" x2="880" y2="30"/><line class="spoke" x1="880" y1="270" x2="1018" y2="76"/><line class="spoke" x1="880" y1="270" x2="1103" y2="196"/><line class="spoke" x1="880" y1="270" x2="1103" y2="344"/><line class="spoke" x1="880" y1="270" x2="1018" y2="464"/><line class="spoke" x1="880" y1="270" x2="880" y2="510"/><line class="spoke" x1="880" y1="270" x2="742" y2="464"/><line class="spoke" x1="880" y1="270" x2="657" y2="344"/><line class="spoke" x1="880" y1="270" x2="657" y2="196"/><line class="spoke" x1="880" y1="270" x2="742" y2="76"/><g class="c c-cdm"><rect x="798" y="8" width="164" height="44" rx="6"/><text x="880.0" y="27.0" text-anchor="middle" font-size="11.5" font-weight="600">Tax profile</text><text class="sub" x="880.0" y="42.0" text-anchor="middle" font-size="10.0">SoR: Tax service</text></g><g class="c c-cdm"><rect x="936" y="54" width="164" height="44" rx="6"/><text x="1018.0" y="73.0" text-anchor="middle" font-size="11.5" font-weight="600">Regulatory classification</text><text class="sub" x="1018.0" y="88.0" text-anchor="middle" font-size="10.0">SoR: Reg. class. service</text></g><g class="c c-cdm"><rect x="1021" y="174" width="164" height="44" rx="6"/><text x="1103.0" y="193.0" text-anchor="middle" font-size="11.5" font-weight="600">KYC &amp; risk profile</text><text class="sub" x="1103.0" y="208.0" text-anchor="middle" font-size="10.0">SoR: CLM KYC</text></g><g class="c c-cdm"><rect x="1021" y="322" width="164" height="44" rx="6"/><text x="1103.0" y="341.0" text-anchor="middle" font-size="11.5" font-weight="600">Ownership &amp; control</text><text class="sub" x="1103.0" y="356.0" text-anchor="middle" font-size="10.0">SoR: UBO graph store</text></g><g class="c c-cdm"><rect x="936" y="442" width="164" height="44" rx="6"/><text x="1018.0" y="461.0" text-anchor="middle" font-size="11.5" font-weight="600">Screening outcomes</text><text class="sub" x="1018.0" y="476.0" text-anchor="middle" font-size="10.0">SoR: Screening case mgr</text></g><g class="c c-cdm"><rect x="798" y="488" width="164" height="44" rx="6"/><text x="880.0" y="507.0" text-anchor="middle" font-size="11.5" font-weight="600">Products &amp; accounts</text><text class="sub" x="880.0" y="522.0" text-anchor="middle" font-size="10.0">SoR: TP systems (mirrored)</text></g><g class="c c-cdm"><rect x="660" y="442" width="164" height="44" rx="6"/><text x="742.0" y="461.0" text-anchor="middle" font-size="11.5" font-weight="600">Limits &amp; facilities</text><text class="sub" x="742.0" y="476.0" text-anchor="middle" font-size="10.0">SoR: Credit system</text></g><g class="c c-cdm"><rect x="575" y="322" width="164" height="44" rx="6"/><text x="657.0" y="341.0" text-anchor="middle" font-size="11.5" font-weight="600">Settlement instructions</text><text class="sub" x="657.0" y="356.0" text-anchor="middle" font-size="10.0">SoR: SSI repository</text></g><g class="c c-cdm"><rect x="575" y="174" width="164" height="44" rx="6"/><text x="657.0" y="193.0" text-anchor="middle" font-size="11.5" font-weight="600">Contacts &amp; signatories</text><text class="sub" x="657.0" y="208.0" text-anchor="middle" font-size="10.0">SoR: CLM</text></g><g class="c c-cdm"><rect x="660" y="54" width="164" height="44" rx="6"/><text x="742.0" y="73.0" text-anchor="middle" font-size="11.5" font-weight="600">Restrictions &amp; status</text><text class="sub" x="742.0" y="88.0" text-anchor="middle" font-size="10.0">SoR: CLM lifecycle</text></g><g class="hub"><circle cx="880" cy="270" r="70"/><text x="880" y="264" text-anchor="middle" font-size="15" font-weight="700">LEM</text><text x="880" y="282" text-anchor="middle" font-size="10.5">legal entity master</text><text x="880" y="297" text-anchor="middle" font-size="10.5">keyed by LE ID</text></g></svg></div>
+  <p class="cap">Figure 7. Case data is a working copy; only the commit gate writes to master objects. SoR assignments shown are indicative.</p>
+  <h3>Case data versus master data</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Aspect</th><th>Case data</th><th>LEM and domain data</th></tr></thead>
+    <tbody>
+      <tr><td><b>Purpose</b></td><td>Run a journey: what is being collected, checked, decided</td><td>Truth about the client, used by the whole bank</td></tr>
+      <tr><td><b>Lifetime</b></td><td>Open to close of one case, then archived</td><td>Life of the client relationship and beyond retention</td></tr>
+      <tr><td><b>Mutability</b></td><td>Freely edited by tasks</td><td>Changed only through the commit gate, new version each time</td></tr>
+      <tr><td><b>Keys</b></td><td>Case ID, journey ID, references LE ID</td><td>LE ID; domain object IDs</td></tr>
+      <tr><td><b>Consumers</b></td><td>CLM users, orchestrator</td><td>TP systems, risk, finance, regulatory reporting</td></tr>
+      <tr><td><b>Store</b></td><td>Case store (document DB)</td><td>Each domain's SoR store (document DB; graph for ownership)</td></tr>
+    </tbody></table></div>
+  <div class="grid2">
+    <div class="panel cdm"><h4>Modelling rules</h4><ul class="b">
+      <li>One JSON Schema per object, held in the schema registry; backward-compatible evolution.</li>
+      <li>LEM holds identity only; domain facts live in domain objects linked by LE ID.</li>
+      <li>Each object has exactly one SoR; others read via API or events.</li>
+      <li>Bitemporal versions: <i>validFrom</i> (business) and <i>recordedAt</i> (system).</li>
+      <li>Field-level provenance: source, method, evidence reference.</li>
+      <li>Hierarchies (parent, branch, fund-to-manager) as typed relationships.</li>
+    </ul></div>
+    <div class="panel cdm"><h4>Sample LEM object</h4>
+<pre>{
+  <span class="s">"leId"</span>: <span class="s">"LE-00918271"</span>,
+  <span class="s">"version"</span>: 7,
+  <span class="s">"validFrom"</span>: <span class="s">"2026-10-02"</span>,
+  <span class="s">"legalName"</span>: { <span class="s">"value"</span>: <span class="s">"Acme Logistics Pte Ltd"</span>,
+     <span class="s">"source"</span>: <span class="s">"ACRA"</span>, <span class="s">"verified"</span>: true },
+  <span class="s">"identifiers"</span>: [
+    { <span class="s">"type"</span>: <span class="s">"LEI"</span>, <span class="s">"value"</span>: <span class="s">"5493..."</span> },
+    { <span class="s">"type"</span>: <span class="s">"REG_NO"</span>, <span class="s">"country"</span>: <span class="s">"SG"</span>, <span class="s">"value"</span>: <span class="s">"2019..."</span> },
+    { <span class="s">"type"</span>: <span class="s">"BVD_ID"</span>, <span class="s">"value"</span>: <span class="s">"SG..."</span>,
+      <span class="s">"matchConfidence"</span>: 0.98 }
+  ],
+  <span class="s">"incorporation"</span>: { <span class="s">"country"</span>: <span class="s">"SG"</span>, <span class="s">"date"</span>: <span class="s">"2019-03-11"</span> },
+  <span class="s">"entityType"</span>: <span class="s">"PRIVATE_LIMITED"</span>,
+  <span class="s">"lifecycleStatus"</span>: <span class="s">"ACTIVE"</span>,
+  <span class="s">"links"</span>: { <span class="s">"tax"</span>: <span class="s">"TAX-..."</span>, <span class="s">"kyc"</span>: <span class="s">"KYC-..."</span> }
+}</pre></div>
+  </div>
+  <div class="rtt"><h4>How it accelerates RTT</h4><ul>
+    <li>Reuse: a client already known in one market or business is not re-collected; only the delta is asked for.</li>
+    <li>TP systems receive clean, approved data once, cutting account-set-up rejects.</li>
+    <li>JSON objects evolve with new markets and products without schema migrations across systems.</li>
+    <li>Clear SoR ownership ends reconciliation between CLM, credit and TP copies.</li>
+    <li>Committed changes publish events, so downstream systems update in minutes, not batches.</li>
+  </ul></div>
+</section>
+
+<section id="rtt">
+  <h2><span class="n">8</span>How the foundations deliver RTT</h2>
+  <p class="sub-lede">Each RTT lever and the foundations that make it possible.</p>
+  <div class="tw"><table class="mx">
+    <thead><tr><th>RTT lever</th><th style="color:var(--pol)">Policy engine</th><th style="color:var(--orc)">Orchestration</th><th style="color:var(--edp)">External data</th><th style="color:var(--cdm)">Client data</th></tr></thead>
+    <tbody>
+      <tr><td>Ask the client once, only for gaps</td><td><span class="dot h"></span></td><td><span class="dot m"></span></td><td><span class="dot h"></span></td><td><span class="dot h"></span></td></tr>
+      <tr><td>Right first time requirements</td><td><span class="dot h"></span></td><td><span class="dot m"></span></td><td></td><td><span class="dot m"></span></td></tr>
+      <tr><td>Parallel workstreams</td><td><span class="dot m"></span></td><td><span class="dot h"></span></td><td></td><td></td></tr>
+      <tr><td>Accounts ready on approval day</td><td><span class="dot m"></span></td><td><span class="dot h"></span></td><td></td><td><span class="dot h"></span></td></tr>
+      <tr><td>Straight-through pre-fill</td><td></td><td><span class="dot m"></span></td><td><span class="dot h"></span></td><td><span class="dot h"></span></td></tr>
+      <tr><td>Proportionate effort by segment and risk</td><td><span class="dot h"></span></td><td><span class="dot h"></span></td><td></td><td></td></tr>
+      <tr><td>Real-time journey transparency</td><td></td><td><span class="dot h"></span></td><td></td><td><span class="dot m"></span></td></tr>
+      <tr><td>Fast adoption of policy change</td><td><span class="dot h"></span></td><td><span class="dot m"></span></td><td></td><td></td></tr>
+      <tr><td>Event-driven, not calendar-driven, servicing</td><td><span class="dot m"></span></td><td><span class="dot h"></span></td><td><span class="dot h"></span></td><td><span class="dot m"></span></td></tr>
+    </tbody></table></div>
+  <div class="legend"><span><span class="dot h"></span>Primary enabler</span><span><span class="dot m"></span>Supporting</span></div>
+  <h3>Critical path compression</h3>
+  <div class="fig"><svg viewBox="0 0 1200 210" role="img" aria-label="Sequential versus orchestrated journey"><text class="blc" x="10" y="24" font-size="12.5" text-anchor="start">Sequential hand-offs (today, typical)</text><g class="bar seqb"><rect x="10" y="34" width="57" height="30" rx="4"/><text x="38.5" y="53" text-anchor="middle" font-size="10.5">Intake</text></g><g class="bar seqb"><rect x="70" y="34" width="67" height="30" rx="4"/><text x="103.5" y="53" text-anchor="middle" font-size="10.5">Enrich</text></g><g class="bar seqb"><rect x="140" y="34" width="167" height="30" rx="4"/><text x="223.5" y="53" text-anchor="middle" font-size="10.5">Docs &amp; outreach</text></g><g class="bar seqb"><rect x="310" y="34" width="57" height="30" rx="4"/><text x="338.5" y="53" text-anchor="middle" font-size="10.5">Tax</text></g><g class="bar seqb"><rect x="370" y="34" width="57" height="30" rx="4"/><text x="398.5" y="53" text-anchor="middle" font-size="10.5">Reg</text></g><g class="bar seqb"><rect x="430" y="34" width="87" height="30" rx="4"/><text x="473.5" y="53" text-anchor="middle" font-size="10.5">UBO</text></g><g class="bar seqb"><rect x="520" y="34" width="67" height="30" rx="4"/><text x="553.5" y="53" text-anchor="middle" font-size="10.5">Screen</text></g><g class="bar seqb"><rect x="590" y="34" width="47" height="30" rx="4"/><text x="613.5" y="53" text-anchor="middle" font-size="10.5">Risk</text></g><g class="bar seqb"><rect x="640" y="34" width="87" height="30" rx="4"/><text x="683.5" y="53" text-anchor="middle" font-size="10.5">EDD</text></g><g class="bar seqb"><rect x="730" y="34" width="157" height="30" rx="4"/><text x="808.5" y="53" text-anchor="middle" font-size="10.5">Accounts</text></g><g class="bar seqb"><rect x="890" y="34" width="77" height="30" rx="4"/><text x="928.5" y="53" text-anchor="middle" font-size="10.5">Limits</text></g><g class="bar seqb"><rect x="970" y="34" width="57" height="30" rx="4"/><text x="998.5" y="53" text-anchor="middle" font-size="10.5">SSI</text></g><text class="blc" x="1038" y="54" font-size="12" text-anchor="start">RTT</text><text class="blc t-orc" x="10" y="104" font-size="12.5" text-anchor="start">Orchestrated, policy-driven, pre-filled (target)</text><g class="bar orcb"><rect x="10" y="114" width="50" height="26" rx="4"/><text x="35.0" y="131" text-anchor="middle" font-size="10.5">Intake</text></g><g class="bar orcb"><rect x="63" y="114" width="42" height="26" rx="4"/><text x="84.0" y="131" text-anchor="middle" font-size="10.5">Enrich</text></g><g class="bar orcb"><rect x="108" y="114" width="42" height="26" rx="4"/><text x="129.0" y="131" text-anchor="middle" font-size="10.5">Gaps</text></g><g class="bar orcb"><rect x="153" y="114" width="90" height="26" rx="4"/><text x="198.0" y="131" text-anchor="middle" font-size="10.5">Outreach</text></g><g class="bar orcb"><rect x="246" y="114" width="55" height="26" rx="4"/><text x="273.5" y="131" text-anchor="middle" font-size="10.5">Tax</text></g><g class="bar orcb"><rect x="304" y="114" width="55" height="26" rx="4"/><text x="331.5" y="131" text-anchor="middle" font-size="10.5">Reg</text></g><g class="bar orcb"><rect x="362" y="114" width="50" height="26" rx="4"/><text x="387.0" y="131" text-anchor="middle" font-size="10.5">Risk</text></g><g class="bar orcb"><rect x="415" y="114" width="90" height="26" rx="4"/><text x="460.0" y="131" text-anchor="middle" font-size="10.5">EDD (M/H)</text></g><g class="bar orcb"><rect x="246" y="146" width="113" height="26" rx="4"/><text x="302.5" y="163" text-anchor="middle" font-size="10.5">UBO + screening</text></g><g class="bar orcb"><rect x="153" y="178" width="260" height="26" rx="4"/><text x="283.0" y="195" text-anchor="middle" font-size="10.5">Pre-provision accounts (restricted)</text></g><g class="bar orcb"><rect x="416" y="178" width="70" height="26" rx="4"/><text x="451.0" y="195" text-anchor="middle" font-size="10.5">Limits</text></g><g class="bar orcb"><rect x="489" y="178" width="55" height="26" rx="4"/><text x="516.5" y="195" text-anchor="middle" font-size="10.5">SSI</text></g><g class="bar actb"><rect x="510" y="146" width="60" height="26" rx="4"/><text x="540" y="163" text-anchor="middle" font-size="10.5">Activate</text></g><text class="blc t-orc" x="580" y="164" font-size="12" text-anchor="start">RTT</text><line class="spoke" x1="582" y1="174" x2="1150" y2="174" stroke-dasharray="4 4"/><text class="bls" x="860" y="200" font-size="10.5" text-anchor="middle">time released by parallel tracks, pre-fill, pre-provisioning and fewer outreach loops (relative, not to scale)</text></svg></div>
+  <p class="cap">Figure 8. Relative illustration of elapsed time; actual gains depend on segment, market and baseline.</p>
+  <div class="grid3">
+    <div class="panel"><h4>Suggested RTT measures</h4><ul class="b">
+      <li>Time to RTT (intake to first transaction possible), by segment.</li>
+      <li>Outreach rounds per case.</li>
+      <li>Share of fields pre-filled from EDP.</li>
+    </ul></div>
+    <div class="panel"><h4>Quality measures</h4><ul class="b">
+      <li>QA rework rate.</li>
+      <li>TP account set-up rejects.</li>
+      <li>Duplicate entity rate.</li>
+    </ul></div>
+    <div class="panel"><h4>Agility measures</h4><ul class="b">
+      <li>Policy change lead time (clause to live rule).</li>
+      <li>Time to onboard a new registry.</li>
+      <li>Journey template change lead time.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="nfr">
+  <h2><span class="n">9</span>Cross-cutting concerns</h2>
+  <div class="grid3">
+    <div class="panel"><h4>Data residency</h4><ul class="b">
+      <li>Regional data planes (e.g. EU, APAC, Middle East, Americas) with in-country stores where mandated.</li>
+      <li>Global index holds only permitted identifiers.</li>
+      <li>OPA rules also govern cross-border data access.</li>
+    </ul></div>
+    <div class="panel"><h4>Audit & lineage</h4><ul class="b">
+      <li>Immutable journey events, decision logs and master versions.</li>
+      <li>Reconstruct any client view and any decision as at any date.</li>
+    </ul></div>
+    <div class="panel"><h4>Security</h4><ul class="b">
+      <li>Attribute-based access by role, market, segment, data class.</li>
+      <li>Field-level encryption for identity documents and PII.</li>
+      <li>mTLS service mesh; signed policy bundles.</li>
+    </ul></div>
+    <div class="panel"><h4>Resilience</h4><ul class="b">
+      <li>Durable workflows survive outages; TP calls retried with backoff.</li>
+      <li>OPA sidecars keep last good bundle if distribution fails.</li>
+      <li>EDP caching shields journeys from vendor downtime.</li>
+    </ul></div>
+    <div class="panel"><h4>Observability</h4><ul class="b">
+      <li>Trace per journey ID across services and TP adapters.</li>
+      <li>SLOs on decision latency, enrichment latency, provisioning success.</li>
+    </ul></div>
+    <div class="panel"><h4>AI governance</h4><ul class="b">
+      <li>LLM clause extraction and IDP outputs always human verified before use.</li>
+      <li>Model inventory, validation and drift monitoring for risk and matching models.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="decisions">
+  <h2><span class="n">10</span>Key architecture decisions</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>Policy execution</td><td>OPA / Rego, sidecar per service, central bundle registry</td><td>Policy as code, sub-ms local decisions, versioned and testable</td></tr>
+      <tr><td>Rule authoring</td><td>Decision tables compiled to Rego</td><td>Policy SMEs own content; engineers own the compiler</td></tr>
+      <tr><td>Orchestration style</td><td>Central orchestrator + event choreography for facts</td><td>Single owner of journey state; loose coupling for downstream reactions</td></tr>
+      <tr><td>Workflow engine</td><td>Durable execution (Camunda 8 or Temporal)</td><td>Long-running, human-in-the-loop journeys with sagas</td></tr>
+      <tr><td>Journey history</td><td>Event store with projections</td><td>Real-time and point-in-time views from one source</td></tr>
+      <tr><td>Entity resolution</td><td>Splink with clerical review band</td><td>Explainable probabilistic matching, open source, scales to millions</td></tr>
+      <tr><td>Client data store</td><td>Versioned JSON documents per SoR; graph store for ownership</td><td>Schema agility across 50+ markets; natural fit for UBO chains</td></tr>
+      <tr><td>Case vs master</td><td>Separate stores joined by a commit gate</td><td>Unapproved data never reaches downstream systems</td></tr>
+      <tr><td>Provisioning</td><td>Pre-stage restricted accounts, activate on approval</td><td>Removes account set-up from the critical path</td></tr>
+    </tbody></table></div>
+</section>
+</main>
+</div>
+<script>
+(function(){
+  try{
+    var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on');}})},{rootMargin:'-30% 0px -60% 0px'});
+    document.querySelectorAll('main section').forEach(function(s){io.observe(s)});
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
